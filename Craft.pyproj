@@ -23,13 +23,13 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ClassImage.py">
+    <Compile Include="Class\ClassImage.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ClassGUI.py">
+    <Compile Include="Class\ClassGUI.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ClassLog.py">
+    <Compile Include="Class\ClassLog.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CraftExe.py" />
@@ -39,6 +39,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".editorconfig" />
+    <Content Include="Ressources\bouton fabriquer.PNG" />
+    <Content Include="Ressources\BuffCl.PNG" />
+    <Content Include="Ressources\ImageBouffe.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Class\" />
+    <Folder Include="Ressources\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
