@@ -22,11 +22,11 @@ class CustomCheckbutton:
         return self.var.get()
 
 class FenetreCommande:
-    def __init__(self):
+    def __init__(self,crafting):
         self.fenetre = tk.Tk()
         self.fenetre.attributes('-topmost', True)
         craft_input = 0 
-
+        self.crafting =crafting
         # Premiere colonne
         LabelConfig = tk.Label(self.fenetre, text="Configuration")
         LabelConfig.grid(row=0, column=0)
@@ -38,13 +38,13 @@ class FenetreCommande:
         separator1.grid(row=0, column=1, rowspan=3, padx=10, sticky='ns')
 
         # Deuxième colonne
-        button_play = tk.Button(self.fenetre, text="Play", command=lambda: play())  # command=play)
+        button_play = tk.Button(self.fenetre, text="Play", command= self.play)
         button_play.grid(row=0, column=2, padx=10, pady=5, sticky='ns')
 
-        button_pause = tk.Button(self.fenetre, text="Pause", command=lambda: pause())  # , command=pause)
+        button_pause = tk.Button(self.fenetre, text="Pause", command= self.pause)  # , command=pause)
         button_pause.grid(row=1, column=2, padx=10, pady=5, sticky='ns')
 
-        button_stop = tk.Button(self.fenetre, text="Test", command=lambda: test())  # , command=stop)
+        button_stop = tk.Button(self.fenetre, text="Test", command= self.test)  # , command=stop)
         button_stop.grid(row=2, column=2, padx=10, pady=5, sticky='ns')
 
         # Séparateur après la deuxième colonne
@@ -80,7 +80,7 @@ class FenetreCommande:
     def isInt(self,value):
         try:
             int(value)
-            return True
+            return True 
         except ValueError:
             return False
 
@@ -89,17 +89,19 @@ class FenetreCommande:
     
     def nb_craft_saisi(self):
         if self.isInt(self.entry_craft.get()):
-            return self.isInt(self.entry_craft.get())
+            return int(self.entry_craft.get())
         else :
             return 0
+    def play(self):
+        global crafting
+        self.crafting.craft_restant = int(self.nb_craft_saisi())
+        self.crafting.status=1
+    def pause(self):
+        crafting.status = 10
+
+    def test(self):
+        print(self.config_bouffe())
 
 
-def play():
-    crafting.craft_restant = int(command.nb_craft_saisi())
-    crafting.status=1
 
-def pause():
-    crafting.status = 10
 
-def test():
-    print(command.config_bouffe())

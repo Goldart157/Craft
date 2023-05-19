@@ -13,16 +13,18 @@ import io
 import threading
 from time import sleep
 
+sys.path.append('C:/Users/Adrien/Documents/1_Documents/Script Python/craft/PythonApplication1/Class')
+
 #### Class Custom
-from ClassLog import *
-from ClassGUI import *
-from ClassImage import *
+from Class.GUI import *
+from Class.Image import *
+from Class.Log import *
 
 ##### Gestion et lecture des log
 #Donnée 
-imageFabriquer = "C:/Users/Adrien/Documents/1_Documents/Script Python/craft/PythonApplication1/Ressources/bouton fabriquer.PNG"
-imageBuffCl = "C:/Users/Adrien/Documents/1_Documents/Script Python/craft/PythonApplication1/Ressources/BuffCl.PNG"
-imageBouffe = "C:/Users/Adrien\Documents/1_Documents/Script Python/craft/PythonApplication1/Ressources/ImageBouffe.PNG"
+imageFabriquer = "./Ressources/bouton fabriquer.PNG"
+imageBuffCl = "./Ressources/BuffCl.PNG"
+imageBouffe = "./Ressources/ImageBouffe.PNG"
 log = "C:/Users/Adrien/Documents/FFLOG"
 logging.basicConfig( level=logging.DEBUG)
 titre_fenetre = "Final Fantasy XIV" 
@@ -86,6 +88,8 @@ def clique(x,y):
         
         return None
 
+
+
 ##### Fonction liées a FF
 ####Mode Craft
 def mainCraft():
@@ -104,26 +108,29 @@ def mainCraft():
              if int(crafting.craft_restant) >= 1 :
                 if t[crafting.status]:
                     if t[crafting.status].timer():
+                        crafting.status = 0
                         break
 
                 if crafting.status ==1 : #Vérification de la nourriture
-                    if command.config_bouffe():
-                        if bouffe.localiser_image():
-                            crafting.status=2
+                    if command.config_bouffe(): #Vérification de l'état de la case config bouffe
+                        if bouffe.localiser_image():#Est ce que le buff est présent ? 
+                            crafting.status=2 #Passage étape 2
                         else:
                             clique(500,1000)
                             if  boutonFab.localiser_image() :
-                                pyautogui.press('n')
+                                pyautogui.press('n') #Fermeture de l'ui crafteur
                                 sleep(1)
-                            pyautogui.press('x')
+                            pyautogui.press('x') #Touche de bouffe
                             sleep(3)
-                            pyautogui.press('n')
+                            pyautogui.press('n') #Réouverture
                             sleep(3)
                             if not boutonFab.localiser_image() :
                                 status=0
                                 logging.error('refresh Food failed')
+                            else:
+                                crafting.status =2
                     else:
-                        status=2
+                        crafting.status=2
         
                 if crafting.status == 2:#Lancement du craft
                     if boutonFab.localiser_image() :
@@ -146,20 +153,20 @@ def mainCraft():
         
                 if crafting.status==5: #Réinit et mise a jour données
                     for i in range(0,5):
-                        if t[i]:
+                        if t[i]: #Reset de tous les time out par etape 
                             t[i].reset()
                     crafting.moins_craft()
                     command.update_craft_restant(int(crafting.craft_restant))
                     logging.info("craft finished")
                     crafting.status=1
             
-####Initialisation des viriable
+####Initialisation des variable
 crafting = craft(0)
 lastFFLOGFile =  chemin_document_plus_recent(log)
 LOGFile = logFFXIV(lastFFLOGFile)
 boutonFab = element_FFXIV(imageFabriquer)
 bouffe =element_FFXIV(imageBouffe)
-command = FenetreCommande()
+command = FenetreCommande(crafting)
 t = [
     None,
     time_out(10),

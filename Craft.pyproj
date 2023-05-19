@@ -23,15 +23,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Class\ClassImage.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Class\ClassGUI.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Class\ClassLog.py">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Class\GUI.py" />
+    <Compile Include="Class\Image.py" />
+    <Compile Include="Class\Log.py" />
     <Compile Include="CraftExe.py" />
   </ItemGroup>
   <ItemGroup>
@@ -39,12 +33,19 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".editorconfig" />
+    <Content Include="Class\__pycache__\ClassGUI.cpython-37.pyc" />
+    <Content Include="Class\__pycache__\ClassImage.cpython-37.pyc" />
+    <Content Include="Class\__pycache__\ClassLog.cpython-37.pyc" />
+    <Content Include="Class\__pycache__\GUI.cpython-37.pyc" />
+    <Content Include="Class\__pycache__\Image.cpython-37.pyc" />
+    <Content Include="Class\__pycache__\Log.cpython-37.pyc" />
     <Content Include="Ressources\bouton fabriquer.PNG" />
     <Content Include="Ressources\BuffCl.PNG" />
     <Content Include="Ressources\ImageBouffe.PNG" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Class\" />
+    <Folder Include="Class\__pycache__\" />
     <Folder Include="Ressources\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
