@@ -138,10 +138,8 @@ def mainCraft():
          while crafting.status!=0 and crafting.status!=10: #on ne fait pas la boucle si le craft n'est pas lancé ou que le craft est pause
             
              if int(crafting.craft_restant) >= 1 :
-                if t[crafting.status]:
-                    if t[crafting.status].timer():
-                        crafting.status = 0
-                        break
+                sleep(1)#Cadencement de la boucle
+
                 #Vérification de la nourriture
                 if crafting.status ==1 : 
                     if verif_Bouffe(command,bouffe,boutonFab):
@@ -173,20 +171,19 @@ def mainCraft():
 
                 #Réinit et mise a jour données
                 if crafting.status==5: 
-                    for i in range(0,5):
-                        if t[i]: #Reset de tous les time out par etape 
-                            t[i].reset()
+
                     crafting.moins_craft()
                     command.update_craft_restant(int(crafting.craft_restant))
                     logging.info("craft finished")
                     crafting.status=1
             
 ####Initialisation des variable
-config_Craft ={
+config_Craft ={ #Config des time out des craft et autre a implémenter plus tard
     1:{ 
         "time_out":10
     }
 }
+
 crafting = craft(0,config_Craft)
 lastFFLOGFile =  chemin_document_plus_recent(log)
 LOGFile = logFFXIV(lastFFLOGFile)
@@ -195,22 +192,16 @@ bouffe =element_FFXIV(imageBouffe)
 command = FenetreCommande(crafting)
 
 
-t = [
-    None,
-    time_out(10),
-    time_out(10),
-    time_out(10),
-    time_out(90),
-    None
-]
+
 
 ###Multi Threading
 
 #threadFenetre = threading.Thread(target=command.run)
 threadCraft = threading.Thread(target=mainCraft)
 #threadCraft.start()
-#command.run()t=time_out(10)*
-crafting.status.statut_change(1)
+
+command.run()
+
 while True:
-    print(crafting.status.return_status())    
+    print(crafting.get_status())
     sleep(1)

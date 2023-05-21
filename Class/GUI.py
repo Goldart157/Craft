@@ -5,36 +5,41 @@ import logging
 
 
 
-
+#Bouton qui change de label si activé ou non
 class CustomCheckbutton:
     def __init__(self, master,row=0,column=0,padx=0,pady=0,text=""):
         self.master = master
         self.var = tk.BooleanVar()
         self.var.trace('w', self.update_label)  # Appeler update_label lorsqu'il y a un changement d'état
         self.label = text
-        self.checkbutton = tk.Checkbutton(self.master, text=self.label+" Désactivé", variable=self.var)
+        self.checkbutton = tk.Checkbutton(self.master, text=self.label+" Off", variable=self.var)
         self.checkbutton.grid(row=row, column=column,  padx=padx, sticky='ns')
 
     def update_label(self, *args):
         if self.var.get():
-            self.checkbutton["text"] = self.label+" Activé"
+            self.checkbutton["text"] = self.label+" On"
         else:
-            self.checkbutton["text"] = self.label+" Désactivé"
+            self.checkbutton["text"] = self.label+" Off"
 
     def get_value(self):
         return self.var.get()
 
+#fenetre de commande principale
 class FenetreCommande:
     def __init__(self,crafting):
         self.fenetre = tk.Tk()
         self.fenetre.attributes('-topmost', True)
         craft_input = 0 
         self.crafting =crafting
+
         # Premiere colonne
         LabelConfig = tk.Label(self.fenetre, text="Configuration")
         LabelConfig.grid(row=0, column=0)
 
         self.foodButton = CustomCheckbutton(self.fenetre,row=1, pady=10,text="Food")
+        self.shutdown_button = CustomCheckbutton(self.fenetre,row=2, pady=5,text="Arrêt apres craft")
+        self.repa_button = CustomCheckbutton(self.fenetre,row=3, pady=5,text="Reparation")
+        self.materialize_button = CustomCheckbutton(self.fenetre,row=4, pady=5,text="Matérialisation")
 
         # Séparateur après la première colonne
         separator1 = ttk.Separator(self.fenetre, orient='vertical')
@@ -95,12 +100,17 @@ class FenetreCommande:
             return int(self.entry_craft.get())
         else :
             return 0
+
     def play(self):
-        global crafting
-        self.crafting.craft_restant = int(self.nb_craft_saisi())
-        self.crafting.status=1
+        if self.nb_craft_saisi()>0:
+            self.crafting.craft_restant = self.nb_craft_saisi()
+            self.crafting.change_statut(1)
+            self.entry_craft.delete(0,tk.END)
+        else:
+             self.label_craft_restant.config(text="N'est pas entier")
+        
     def pause(self):
-        crafting.status = 10
+        self.crafting.change_statut(10)
 
     def test(self):
         print(self.config_bouffe())
