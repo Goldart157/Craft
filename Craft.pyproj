@@ -23,6 +23,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Class\Craft.py" />
     <Compile Include="Class\GUI.py" />
     <Compile Include="Class\Image.py" />
     <Compile Include="Class\Log.py" />
