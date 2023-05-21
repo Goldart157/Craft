@@ -19,6 +19,9 @@ sys.path.append('C:/Users/Adrien/Documents/1_Documents/Script Python/craft/Pytho
 from Class.GUI import *
 from Class.Image import *
 from Class.Log import *
+from Class.Craft import *
+
+
 
 ##### Gestion et lecture des log
 #Donnée 
@@ -91,11 +94,40 @@ def clique(x,y):
 
 
 ##### Fonction liées a FF
+def verif_Bouffe(command,bouffe,boutonFab):
+    
+    if command.config_bouffe(): #Vérification de l'état de la case config bouffe
+        if bouffe.localiser_image():#Est ce que le buff est présent ? 
+            crafting.status=2 #Passage étape 2
+            logging.info("buff Nourriture actif")
+        else:
+            clique(500,1000)
+            if  boutonFab.localiser_image() :
+                pyautogui.press('n') #Fermeture de l'ui crafteur
+                sleep(1)
+                logging.debug("interface crafteur fermée")
+            pyautogui.press('x') #Touche de bouffe
+            logging.debug("nourriture appuyée")
+            sleep(3)
+            pyautogui.press('n') #Réouverture
+            logging.debug("interface crafteur ouverte")
+            sleep(3)
+            if not boutonFab.localiser_image() :
+                logging.error('refresh Food failed')
+                return True
+            else:
+                return False
+    else:
+        return True 
+
+
+
+
 ####Mode Craft
 def mainCraft():
     while True:
-         sleep(1)
-         logging.info("Craft Lancé")
+         sleep(2)
+         logging.info("Boucle Craft en attente")
          global crafting
          global t
          global command
@@ -110,48 +142,37 @@ def mainCraft():
                     if t[crafting.status].timer():
                         crafting.status = 0
                         break
-
-                if crafting.status ==1 : #Vérification de la nourriture
-                    if command.config_bouffe(): #Vérification de l'état de la case config bouffe
-                        if bouffe.localiser_image():#Est ce que le buff est présent ? 
-                            crafting.status=2 #Passage étape 2
-                        else:
-                            clique(500,1000)
-                            if  boutonFab.localiser_image() :
-                                pyautogui.press('n') #Fermeture de l'ui crafteur
-                                sleep(1)
-                            pyautogui.press('x') #Touche de bouffe
-                            sleep(3)
-                            pyautogui.press('n') #Réouverture
-                            sleep(3)
-                            if not boutonFab.localiser_image() :
-                                status=0
-                                logging.error('refresh Food failed')
-                            else:
-                                crafting.status =2
-                    else:
+                #Vérification de la nourriture
+                if crafting.status ==1 : 
+                    if verif_Bouffe(command,bouffe,boutonFab):
                         crafting.status=2
-        
-                if crafting.status == 2:#Lancement du craft
+                        logging.info("Config Nourriture vérifiée")
+                    else:
+                        crafting.status=0
+                        logging.error("Pas de confirmation nourriture up")
+
+                #Lancement du craft
+                if crafting.status == 2:
                     if boutonFab.localiser_image() :
                         boutonFab.clique_droit_image()
                         crafting.status=3
                         logging.info("Bouton fab cliqué")
                
-        
-                if crafting.status == 3:#Lancement de la macro
+                #Lancement de la macro
+                if crafting.status == 3:
                     logging.debug("attente confirmation lancement craft")
                     if LOGFile.message_apparait("Vous commencez à fabrique"):
                         crafting.status = 4
                         pyautogui.press('c')
                         logging.info("macro lancé")
-        
-                if crafting.status == 4 :#attente fin
+                #attente fin
+                if crafting.status == 4 :
                     logging.debug("attente fin de craft")
                     if LOGFile.message_apparait("Vous fabriquez"):
                         crafting.status=5
-        
-                if crafting.status==5: #Réinit et mise a jour données
+
+                #Réinit et mise a jour données
+                if crafting.status==5: 
                     for i in range(0,5):
                         if t[i]: #Reset de tous les time out par etape 
                             t[i].reset()
@@ -161,12 +182,19 @@ def mainCraft():
                     crafting.status=1
             
 ####Initialisation des variable
-crafting = craft(0)
+config_Craft ={
+    1:{ 
+        "time_out":10
+    }
+}
+crafting = craft(0,config_Craft)
 lastFFLOGFile =  chemin_document_plus_recent(log)
 LOGFile = logFFXIV(lastFFLOGFile)
 boutonFab = element_FFXIV(imageFabriquer)
 bouffe =element_FFXIV(imageBouffe)
 command = FenetreCommande(crafting)
+
+
 t = [
     None,
     time_out(10),
@@ -178,11 +206,11 @@ t = [
 
 ###Multi Threading
 
-threadFenetre = threading.Thread(target=command.run)
+#threadFenetre = threading.Thread(target=command.run)
 threadCraft = threading.Thread(target=mainCraft)
-threadCraft.start()
-command.run()
-
-
-
-
+#threadCraft.start()
+#command.run()t=time_out(10)*
+crafting.status.statut_change(1)
+while True:
+    print(crafting.status.return_status())    
+    sleep(1)
