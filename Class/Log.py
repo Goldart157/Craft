@@ -11,24 +11,32 @@ class logFFXIV:
         self.message = None
         self.heure_message_prev = datetime(1994,12,13,0,0,0)
 
-    def derniere_ligne_filtree(self,filtre): #Renvoie la dernière du fichier spécifi contenant le filtre
+    def derniere_ligne_filtree(self,filtre,sans_validation=False): #Renvoie la dernière du fichier spécifi contenant le filtre
         with open(self.fichier, 'r', encoding='utf-8') as f:
             lignes = f.readlines()
-            lignes = lignes[-100:]  # Obtenir les 100 dernières lignes du fichier
+            if not sans_validation:
+                lignes = lignes[-100:]  # Obtenir les 100 dernières lignes du fichier
+            else:
+                lignes = lignes[-300:]
             for ligne in reversed(lignes):
                 ligne = ligne.strip()
             
                 if filtre in ligne:
                     #Si il y a un résultat on compare son heure avec l'heure du message précédent pour le valider           
                     temp_heure_message = self._extraire_heure(ligne) 
-
-                    if  temp_heure_message > self.heure_message:
-                        self.heure_message = temp_heure_message
-                        self.message = ligne #On enregistre le message dans l'element
-                        logging.info("Trouvé ligne :"+ligne)
-                        return self.message 
-                    else: 
-                        logging.debug("heure message actuel < a h dernier message lu: None returned")
+                    if not sans_validation:
+                        if  temp_heure_message > self.heure_message:
+                            self.heure_message = temp_heure_message
+                            self.message = ligne #On enregistre le message dans l'element
+                            logging.info("Trouvé ligne :"+ligne)
+                            return self.message 
+                        else: 
+                            logging.debug("heure message actuel < a h dernier message lu: None returned")
+                    else:
+                        if datetime.now() - temp_heure_message > timedelta(minutes=2):
+                            self.message = ligne #On enregistre le message dans l'element
+                            logging.info("Trouvé ligne :"+ligne)
+                            return self.message 
         return None
 
     def _extraire_heure(self,message):
@@ -44,8 +52,8 @@ class logFFXIV:
             logging.debug("Aucune heure trouvée dans le message")
             return None
     
-    def message_apparait (self, filtre):
-        temp = self.derniere_ligne_filtree(filtre)
+    def message_apparait (self, filtre,sans_validation=False):
+        temp = self.derniere_ligne_filtree(filtre,sans_validation=sans_validation)
         if temp is not None:
             return True
         else: 

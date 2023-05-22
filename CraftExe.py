@@ -5,6 +5,7 @@ import keyboard
 import pyautogui
 import pygetwindow
 
+import ctypes
 import re
 import sys
 import logging
@@ -12,6 +13,7 @@ from PIL import Image
 import io
 import threading
 from time import sleep
+
 
 sys.path.append('C:/Users/Adrien/Documents/1_Documents/Script Python/craft/PythonApplication1/Class')
 
@@ -28,9 +30,14 @@ from Class.Craft import *
 imageFabriquer = "./Ressources/bouton fabriquer.PNG"
 imageBuffCl = "./Ressources/BuffCl.PNG"
 imageBouffe = "./Ressources/ImageBouffe.PNG"
+imagePot = "./Ressources/buffPot.png"
+imageBoutonToutReparer = "./Ressources/bouton tout reparer.PNG"
+imageBoutonOui = "./Ressources/boutton oui.PNG"
 log = "C:/Users/Adrien/Documents/FFLOG"
 logging.basicConfig( level=logging.DEBUG)
 titre_fenetre = "Final Fantasy XIV" 
+
+
 
 def stop_program(e):
     if e.name == 'esc':
@@ -59,15 +66,6 @@ def chemin_document_plus_recent(dossier="C:/Users/Adrien/Documents/FFLOG"):
     logging.info("Le fichier FFLOG trouvé est :"+chemin_plus_recent)
     return chemin_plus_recent #Renvoie le fichier le plus récent d'un dossier
 
-
-
-###### Fonction de gestion d'image, recherche et clique sur élement du jeu 
-
-
-
-
-
-
 ###### Fonction diverses
            
 def bool_to_str(value):
@@ -94,111 +92,187 @@ def clique(x,y):
 
 
 ##### Fonction liées a FF
-def verif_Bouffe(command,bouffe,boutonFab):
-    
-    if command.config_bouffe(): #Vérification de l'état de la case config bouffe
-        if bouffe.localiser_image():#Est ce que le buff est présent ? 
-            crafting.status=2 #Passage étape 2
-            logging.info("buff Nourriture actif")
+
+def verif_buff(command,buff,touche_buff):
+    global boutonFab
+    #Vérification de l'état de la case config bouffe
+    if buff.localiser_image():#Est ce que le buff est présent ? 
+
+        return True
+        logging.info("buff Nourriture actif")
+    else:
+
+        hwnd = boutonFab.windows._hWnd
+        ctypes.windll.user32.SetForegroundWindow(hwnd)
+        if  boutonFab.localiser_image() :
+
+            pyautogui.press('n') #Fermeture de l'ui crafteur
+            sleep(5)
+            logging.debug("interface crafteur fermée")
+        
+
+        pyautogui.press(touche_buff) #Touche de bouffe
+        logging.debug("nourriture appuyée")
+        sleep(3)
+        pyautogui.press('n') #Réouverture
+        logging.debug("interface crafteur ouverte")
+        sleep(3)
+
+        if boutonFab.localiser_image() :
+
+            logging.error('refresh Food failed')
+            return True
+
         else:
-            clique(500,1000)
-            if  boutonFab.localiser_image() :
-                pyautogui.press('n') #Fermeture de l'ui crafteur
-                sleep(1)
-                logging.debug("interface crafteur fermée")
-            pyautogui.press('x') #Touche de bouffe
-            logging.debug("nourriture appuyée")
-            sleep(3)
-            pyautogui.press('n') #Réouverture
-            logging.debug("interface crafteur ouverte")
-            sleep(3)
-            if not boutonFab.localiser_image() :
+            pyautogui.press('n') 
+            if boutonFab.localiser_image() and buff.localiser_image() :
+
                 logging.error('refresh Food failed')
                 return True
             else:
                 return False
-    else:
-        return True 
-
-
-
-
+    
+def reparation(touche_repa):
+    logging.info("reparation a faire")
+    global bouton_tout_reparer
+    global bouton_oui
+    global boutonFab
+    if boutonFab.localiser_image():
+        pyautogui.press('n')
+    sleep(3)
+    pyautogui.press(touche_repa)
+    sleep(1)
+    if  bouton_tout_reparer.localiser_image():
+        logging.debug("bouton oui et tout réparé ok")
+        bouton_tout_reparer.clique_droit_image()
+        sleep(1)
+        if bouton_oui.localiser_image():
+            bouton_oui.clique_droit_image()
+            sleep(5)
+            pyautogui.press(touche_repa)
+            sleep(1)
+            pyautogui.press('n')
+            sleep(1)
+            logging.info("equipement réparé")
+            return True
+        
+    logging.debug("bouton oui ou bouton tout reparer non trouvé")
+    return False
+    
 ####Mode Craft
 def mainCraft():
-    while True:
-         sleep(2)
-         logging.info("Boucle Craft en attente")
-         global crafting
-         global t
-         global command
-         global boutonFab
-         global bouffe
-         global LOGFile
-
-         while crafting.status!=0 and crafting.status!=10: #on ne fait pas la boucle si le craft n'est pas lancé ou que le craft est pause
-            
+    
+         
+    global crafting
+    global t
+    global command
+    global boutonFab
+    global bouffe
+    global LOGFile
+    global pot
+    while crafting.get_status()<20:
+        sleep(2)
+        logging.info("Boucle Craft en attente")
+        while crafting.get_status() > 0 and crafting.get_status() < 10: #on ne fait pas la boucle si le craft n'est pas lancé ou que le craft est pause
+             sleep(1)
+             logging.debug("boucle de craft ite")
              if int(crafting.craft_restant) >= 1 :
-                sleep(1)#Cadencement de la boucle
-
+                
+                print (crafting.get_status())
                 #Vérification de la nourriture
-                if crafting.status ==1 : 
-                    if verif_Bouffe(command,bouffe,boutonFab):
-                        crafting.status=2
-                        logging.info("Config Nourriture vérifiée")
+                if crafting.get_status() ==2:
+                    if command.config_bouffe():
+                        if verif_buff(command,bouffe,'c'):
+                            crafting.next_step()
+                            logging.info("Config Nourriture vérifiée")
+                        else:
+                            crafting.status=0
+
                     else:
-                        crafting.status=0
-                        logging.error("Pas de confirmation nourriture up")
+                        crafting.next_step()
+                
+                        #Vérification de la config pot
+                if crafting.get_status() ==3:
+                    if command.config_pot():
+                        if verif_buff(command,pot,'x'):
+                            crafting.next_step()
+                            logging.info("Config Pot vérifiée")
+                        else:
+                            crafting.status=0
+                            logging.error("Pas de confirmation POT up")
+                    else:
+                         crafting.next_step()
+
 
                 #Lancement du craft
-                if crafting.status == 2:
+                if crafting.get_status() ==4:
                     if boutonFab.localiser_image() :
                         boutonFab.clique_droit_image()
-                        crafting.status=3
+                        crafting.next_step()
                         logging.info("Bouton fab cliqué")
                
                 #Lancement de la macro
-                if crafting.status == 3:
+                if crafting.get_status() ==5 : 
                     logging.debug("attente confirmation lancement craft")
                     if LOGFile.message_apparait("Vous commencez à fabrique"):
-                        crafting.status = 4
-                        pyautogui.press('c')
+                        crafting.next_step()
+                        pyautogui.press('a')
                         logging.info("macro lancé")
                 #attente fin
-                if crafting.status == 4 :
+                if crafting.get_status() ==6:
                     logging.debug("attente fin de craft")
                     if LOGFile.message_apparait("Vous fabriquez"):
-                        crafting.status=5
+                        crafting.next_step()
+
+                #Verification equipement non cassé
+                if crafting.get_status() ==1:
+                    if command.repa_button.get_value():
+                        logging.debug("Verification Reparation")
+                        if RechercheRepa.message_apparait("cassé",True):
+                            if reparation('v'):
+                                crafting.next_step()
+                            else:
+                                logging.error("reparation failed")
+                                crafting.change_status(0)
+                        else:
+                            crafting.next_step()
+                    else:
+                            crafting.next_step()
+
 
                 #Réinit et mise a jour données
-                if crafting.status==5: 
+                if crafting.get_status()==7: 
 
                     crafting.moins_craft()
                     command.update_craft_restant(int(crafting.craft_restant))
                     logging.info("craft finished")
-                    crafting.status=1
+                    if crafting.get_craft_restant()>0:
+                        crafting.change_status(1)
+                    else:
+                        crafting.change_status(0)
             
 ####Initialisation des variable
 config_Craft ={ #Config des time out des craft et autre a implémenter plus tard
-    1:{ 
-        "time_out":10
-    }
+    
 }
 
 crafting = craft(0,config_Craft)
 lastFFLOGFile =  chemin_document_plus_recent(log)
 LOGFile = logFFXIV(lastFFLOGFile)
+RechercheRepa = logFFXIV(lastFFLOGFile)
 boutonFab = element_FFXIV(imageFabriquer)
 bouffe =element_FFXIV(imageBouffe)
+pot = element_FFXIV(imagePot)
+bouton_tout_reparer = element_FFXIV( imageBoutonToutReparer)
+bouton_oui = element_FFXIV(imageBoutonOui)
 command = FenetreCommande(crafting)
-
-
 
 
 ###Multi Threading
 
 #threadFenetre = threading.Thread(target=command.run)
 threadCraft = threading.Thread(target=mainCraft)
-#threadCraft.start()
+threadCraft.start()
 
 command.run()
 

@@ -3,7 +3,7 @@ import logging
 import threading
 import datetime
 lock = threading.Lock()
-
+import pygetwindow
 
 class status():
     def __init__(self,config):
@@ -13,7 +13,7 @@ class status():
         self.config = config
         self._thread = None
 
-    def statut_change(self,statut):
+    def status_change(self,statut):
         new_value = int(statut)
         if new_value != self._value:
             if new_value in self.config: #On vérifie si un timer a été précisé pour le statut actuel
@@ -50,15 +50,18 @@ class craft:
     def get_craft_restant(self):
         return self.craft_restant
 
-    def change_statut(self,new_status):
+    def change_status(self,new_status):
         try:
             temp=int(new_status)
-            self._status.statut_change(new_status)
+            self._status.status_change(new_status)
         except:
             logging.debug("statut n'as pas été changé")
 
     def get_status(self):
         return self._status.return_status()
-            
+
+    def next_step(self):
+        temp=self._status.return_status()
+        self.change_status(temp+1)            
 
       
