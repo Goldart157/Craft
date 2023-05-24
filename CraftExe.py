@@ -4,7 +4,7 @@ import time
 import keyboard 
 import pyautogui
 import pygetwindow
-
+import subprocess
 import ctypes
 import re
 import sys
@@ -37,9 +37,15 @@ log = "C:/Users/Adrien/Documents/FFLOG"
 logging.basicConfig( level=logging.DEBUG)
 titre_fenetre = "Final Fantasy XIV" 
 
-
+def shutdown_computer():
+    try:
+        subprocess.run(["shutdown", "/s","/f", "/t", "0"], shell=True)
+        print("Arrêt de l'ordinateur en cours...")
+    except subprocess.CalledProcessError as e:
+        print("Une erreur s'est produite lors de l'arrêt de l'ordinateur :", e)
 
 def stop_program(e):
+   
     if e.name == 'esc':
         print("Arrêt du programme")
         sys.exit() #Permet de stopper le programme a tout moment en appuyant sur echap
@@ -49,8 +55,8 @@ keyboard.on_press(stop_program)
 
 def chemin_document_plus_recent(dossier="C:/Users/Adrien/Documents/FFLOG"):
     fichiers = os.listdir(dossier)
-    if not fichiers:
-        logging.error("Aucun dossier n'as été trouvé le chemin n'est pas pas valide")
+    if not fichiers: #Si le dossier est mauvais
+        logging.error("Le dossier log n'est pas valide ")
         return None
     
     chemin_plus_recent = None
@@ -58,12 +64,19 @@ def chemin_document_plus_recent(dossier="C:/Users/Adrien/Documents/FFLOG"):
     
     for fichier in fichiers:
         chemin = os.path.join(dossier, fichier)
+
         if os.path.isfile(chemin):
+
+
             date_modification = os.path.getmtime(chemin)
+
+            #Si le chemin est plus récent on le sauvegarde
             if date_plus_recente is None or date_modification > date_plus_recente:
                 date_plus_recente = date_modification
                 chemin_plus_recent = chemin
+
     logging.info("Le fichier FFLOG trouvé est :"+chemin_plus_recent)
+
     return chemin_plus_recent #Renvoie le fichier le plus récent d'un dossier
 
 ###### Fonction diverses
@@ -94,16 +107,21 @@ def clique(x,y):
 ##### Fonction liées a FF
 
 def verif_buff(command,buff,touche_buff):
+
     global boutonFab
     #Vérification de l'état de la case config bouffe
+    
     if buff.localiser_image():#Est ce que le buff est présent ? 
-
-        return True
+        
         logging.info("buff Nourriture actif")
+        return True
+       
     else:
 
+        #On met la fenetre FF14 au premier plan et focus
         hwnd = boutonFab.windows._hWnd
         ctypes.windll.user32.SetForegroundWindow(hwnd)
+
         if  boutonFab.localiser_image() :
 
             pyautogui.press('n') #Fermeture de l'ui crafteur
@@ -111,25 +129,31 @@ def verif_buff(command,buff,touche_buff):
             logging.debug("interface crafteur fermée")
         
 
-        pyautogui.press(touche_buff) #Touche de bouffe
+        pyautogui.press(touche_buff) #On met le buff
         logging.debug("nourriture appuyée")
         sleep(3)
-        pyautogui.press('n') #Réouverture
+
+        pyautogui.press('n') #Réouverture de l'interface crafteur
         logging.debug("interface crafteur ouverte")
         sleep(3)
 
-        if boutonFab.localiser_image() :
+        if boutonFab.localiser_image() : #Si l'interface de craft est présente on valide
 
             logging.error('refresh Food failed')
             return True
 
         else:
+
+            #Sinon on tente de l'ouvrir et on reregarde
             pyautogui.press('n') 
+
             if boutonFab.localiser_image() and buff.localiser_image() :
 
                 logging.error('refresh Food failed')
                 return True
+
             else:
+
                 return False
     
 def reparation(touche_repa):
@@ -158,11 +182,25 @@ def reparation(touche_repa):
         
     logging.debug("bouton oui ou bouton tout reparer non trouvé")
     return False
+
+#Permet de réaliser un affichage en temps réel des données de craft 
+def update_status_GUI(): 
+    global crafting
+    global command
+    global config_Craft
+    while crafting.get_status() != 99:
+        status = crafting.get_status()
+        command.update_status(status,config_Craft[status]["text"])
+        command.update_duree_restant(crafting.duree_craft_restante())
+        sleep(0.5)
+
+        
+
+        
+#Programme principal qui a en charge toute la gestion du craft
+def grafcet_craft():
     
-####Mode Craft
-def mainCraft():
-    
-         
+    #Déclaration Variable globale
     global crafting
     global t
     global command
@@ -170,15 +208,19 @@ def mainCraft():
     global bouffe
     global LOGFile
     global pot
-    while crafting.get_status()<20:
+
+    while crafting.get_status()!=99: #On fait la boucle tant que le statut n'est pas arret du programme (99)
+
         sleep(2)
         logging.info("Boucle Craft en attente")
+
         while crafting.get_status() > 0 and crafting.get_status() < 10: #on ne fait pas la boucle si le craft n'est pas lancé ou que le craft est pause
+
              sleep(1)
              logging.debug("boucle de craft ite")
-             if int(crafting.craft_restant) >= 1 :
+
+             if int(crafting.craft_restant) >= 1 : #Boucle a faire tant qu'il y a des craft a faire
                 
-                print (crafting.get_status())
                 #Vérification de la nourriture
                 if crafting.get_status() ==2:
                     if command.config_bouffe():
@@ -249,14 +291,57 @@ def mainCraft():
                     if crafting.get_craft_restant()>0:
                         crafting.change_status(1)
                     else:
-                        crafting.change_status(0)
+                        if command.config_arret():
+                            shutdown_computer()
+                        else:
+                            crafting.change_status(0)
             
 ####Initialisation des variable
-config_Craft ={ #Config des time out des craft et autre a implémenter plus tard
-    
+config_Craft ={
+   0:{
+       "time_out":None,
+       "text":"Attente de craft"
+     },
+   1:{
+       "time_out":None,
+       "text":"Vérification Repa"
+     },
+   2:{
+       "time_out":None,
+       "text":"Vérification Bouffe"
+     },
+   3:{
+       "time_out":None,
+       "text":"Vérification Pot"
+     },
+   4:{
+       "time_out":None,
+       "text":"Lancement Synthèse"
+     },
+   5:{
+       "time_out":None,
+       "text":"Lancement Macro Craft"
+     },
+   6:{
+       "time_out":None,
+       "text":"Attente fin craft"
+     },
+   7:{
+       "time_out":None,
+       "text":"Reset et relancement"
+     },
+   10:{
+       "time_out":None,
+       "text":"Paused"
+     },
+   99:{
+       "time_out":None,
+       "text":"Paused"
+     }  
+  
 }
 
-crafting = craft(0,config_Craft)
+
 lastFFLOGFile =  chemin_document_plus_recent(log)
 LOGFile = logFFXIV(lastFFLOGFile)
 RechercheRepa = logFFXIV(lastFFLOGFile)
@@ -265,17 +350,18 @@ bouffe =element_FFXIV(imageBouffe)
 pot = element_FFXIV(imagePot)
 bouton_tout_reparer = element_FFXIV( imageBoutonToutReparer)
 bouton_oui = element_FFXIV(imageBoutonOui)
+crafting = craft(0,config_Craft)
 command = FenetreCommande(crafting)
 
 
 ###Multi Threading
 
 #threadFenetre = threading.Thread(target=command.run)
-threadCraft = threading.Thread(target=mainCraft)
-threadCraft.start()
+thread_craft = threading.Thread(target=grafcet_craft)
+thread_update_data_GUI = threading.Thread(target=update_status_GUI)
+thread_craft.start()
+thread_update_data_GUI.start()
 
 command.run()
-
-while True:
-    print(crafting.get_status())
-    sleep(1)
+crafting.change_status(99)
+logging.debug("prout")

@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 import logging
-
+from datetime import timedelta
 
 
 #Bouton qui change de label si activé ou non
@@ -44,11 +44,14 @@ class FenetreCommande:
 
         # Séparateur après la première colonne
         separator1 = ttk.Separator(self.fenetre, orient='vertical')
-        separator1.grid(row=0, column=1, rowspan=5, padx=10, sticky='ns')
+        separator1.grid(row=0, column=1, rowspan=6, padx=10, sticky='ns')
 
         # Deuxième colonne
-        label_status = tk.Label(self.fenetre,text="Status")
-        label_status.grid(row=0, column=2, padx=10, pady=5, sticky='ns')
+        self.label_status = tk.Label(self.fenetre,text="Status : 0")
+        self.label_status.grid(row=0, column=2, padx=10, pady=5, sticky='ns')
+
+        self.label_text_status = tk.Label(self.fenetre,text="Attente Lancement")
+        self.label_text_status.grid(row=1, column=2, padx=10, pady=5, sticky='ns')
 
         button_play = tk.Button(self.fenetre, text="Play", command= self.play,width=10)
         button_play.grid(row=2, column=2, padx=10, pady=5, sticky='ns')
@@ -61,37 +64,74 @@ class FenetreCommande:
 
         # Séparateur après la deuxième colonne
         separator2 = ttk.Separator(self.fenetre, orient='vertical')
-        separator2.grid(row=0, column=3, rowspan=5, padx=10, sticky='ns')
+        separator2.grid(row=0, column=3, rowspan=6, padx=10, sticky='ns')
 
         # Troisième colonne
         label_craft = tk.Label(self.fenetre, text="Nombre de crafts à faire:")
         label_craft.grid(row=0, column=4, padx=10, pady=5, sticky='ns')
 
         self.label_craft_restant = tk.Label(self.fenetre, text="Restant : 0")
-        self.label_craft_restant.grid(row=2, column=4, padx=10, pady=5, sticky='ns')
+        self.label_craft_restant.grid(row=3, column=4, padx=10, pady=5, sticky='ns')
 
         self.entry_craft = tk.Entry(self.fenetre)
         self.entry_craft.grid(row=1, column=4, padx=10, pady=5, sticky='w')
         self.entry_craft.bind("<KeyRelease>", self._update_craft_after_key)
         
-        label_tps_restant = tk.Label(self.fenetre,text="Temps restant:")
-        label_tps_restant.grid(row=0, column=2, padx=10, pady=5, sticky='ns')
+        # Séparateur après la craft 
+        separator3 = ttk.Separator(self.fenetre, orient='horizontal')
+        separator3.grid(row=2, column=4,  sticky='ew')
 
+       
 
-    def _update_craft_after_key(self, event):
+        self.label_Duree_restant = tk.Label(self.fenetre,text="Durée restante :")
+        self.label_Duree_restant.grid(row=4, column=4, padx=10, pady=5, sticky='ns')
+
+        self.label_Valeur_Duree_restant = tk.Label(self.fenetre,text="00:00:00")
+        self.label_Valeur_Duree_restant.grid(row=5, column=4, padx=10, pady=5, sticky='ns')
+
+    #Permet de rentrer la config saisie dans l'input box dans la variable
+    def _update_craft_after_key(self, event): 
         temp = self.entry_craft.get()
         if self.isInt(temp)and self.entry_craft.focus_get():
             self.label_craft_restant.config(text="Restant : " + str(temp))
             self.craft_input = temp
             logging.debug("label updated")
-
+    
+    #Update du label craft restant
     def update_craft_restant(self, new_craft_restant=0):
         if self.isInt(new_craft_restant):
             self.label_craft_restant.config(text="Restant : " + str(new_craft_restant))
 
+    #Updtate du status
+    def update_status(self,status,text="No label for this status"):
+        self.label_status.config(text="Status : "+str(status))
+        self.label_text_status.config(text=text)
+
+    def update_duree_restant(self,duree):
+        if not isinstance(duree,timedelta):
+            self.label_Valeur_Duree_restant.config(text="00:00:00")
+        else: 
+            nbsecond = duree.seconds
+            
+            hours = nbsecond // 3600
+            minutes = (nbsecond % 3600) // 60
+            strtime = str(hours) +":"+str(minutes)+":00"
+            self.label_Valeur_Duree_restant.config(text=strtime)
+
+    def isInt(self,value):
+        try:
+            int(value)
+            return True 
+        except ValueError:
+            return False
     def run(self):
         # Lancer la boucle principale de la fenêtre
         self.fenetre.mainloop()
+    
+    #Updtate du status
+    def update_status(self,status,text="No label for this status"):
+        self.label_status.config(text="Status :"+str(status))
+        self.label_text_status.config(text=text)
 
     def isInt(self,value):
         try:
@@ -100,18 +140,24 @@ class FenetreCommande:
         except ValueError:
             return False
 
+    #Fonction pour retourner les valeurs de la config
     def config_bouffe(self):
         return self.foodButton.get_value()
 
     def config_pot(self):
         return self.potButton.get_value()
+
+    def config_arret(self):
+        return self.shutdown_button.get_value()
     
     def nb_craft_saisi(self):
         if self.isInt(self.entry_craft.get()):
             return int(self.entry_craft.get())
         else :
             return 0
+    
         
+    #Fonction liées au bouton
     def play(self):
         if self.nb_craft_saisi()>0:
             self.crafting.craft_restant= self.nb_craft_saisi()

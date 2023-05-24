@@ -59,6 +59,12 @@ class logFFXIV:
         else: 
             return False
 
+    def set_reset(self,filtre_set,filtre_reset):
+        while True:
+            sleep(1)
+
+
+
 class craft:
     def __init__(self,craft):
         self.craft = craft
