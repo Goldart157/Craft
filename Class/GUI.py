@@ -109,13 +109,13 @@ class FenetreCommande:
 
     def update_duree_restant(self,duree):
         if not isinstance(duree,timedelta):
-            self.label_Valeur_Duree_restant.config(text="00:00:00")
+            self.label_Valeur_Duree_restant.config(text="")
         else: 
             nbsecond = duree.seconds
             
             hours = nbsecond // 3600
             minutes = (nbsecond % 3600) // 60
-            strtime = str(hours) +":"+str(minutes)+":00"
+            strtime = str(hours) +"h "+str(minutes)+" min"
             self.label_Valeur_Duree_restant.config(text=strtime)
 
     def isInt(self,value):
