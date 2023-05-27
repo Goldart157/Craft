@@ -130,7 +130,7 @@ class FenetreCommande:
     
     #Updtate du status
     def update_status(self,status,text="No label for this status"):
-        self.label_status.config(text="Status :"+str(status))
+        self.label_status.config(text="Status : "+str(status))
         self.label_text_status.config(text=text)
 
     def isInt(self,value):

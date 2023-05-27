@@ -39,16 +39,15 @@ class status():
     
     def timeout_handler(self): #Réinitialise le status si time_out 
         with lock:
-            self._value = 0
+            self._value = 98
 
     def return_status(self):
         return self._value
 
     def chrono(self):
         stat= self.return_status()
-        print("chroonnnnnnnnnnnnnnnnoooooooooooooooooooooo")
         print(str(self.duree_cycle))
-        if stat==1:
+        if stat==1: 
             self.heure_init = datetime.datetime.now()
             self.chrono_unvalid = False #Au passage a 1 la mesure de temps est revalidée 
         if stat==7 and not self.chrono_unvalid :

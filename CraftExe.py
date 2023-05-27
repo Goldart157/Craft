@@ -161,6 +161,7 @@ def reparation(touche_repa):
     global bouton_tout_reparer
     global bouton_oui
     global boutonFab
+    sleep(2)
     if boutonFab.localiser_image():
         pyautogui.press('n')
     sleep(3)
@@ -219,8 +220,24 @@ def grafcet_craft():
              sleep(1)
              logging.debug("boucle de craft ite")
 
-             if int(crafting.craft_restant) >= 1 : #Boucle a faire tant qu'il y a des craft a faire
-                
+             #Grafcet du programme
+             if int(crafting.craft_restant) >= 1 : 
+
+                #Verification equipement non cassé
+                if crafting.get_status() ==1:
+                    if command.repa_button.get_value()and False:#####Le déclencheur de réparation doit être refait
+                        logging.debug("Verification Reparation")
+                        if RechercheRepa.message_apparait("cassé",True):
+                            if reparation('v'):
+                                crafting.next_step()
+                            else:
+                                logging.error("reparation failed")
+                                crafting.change_status(0)
+                        else:
+                            crafting.next_step()
+                    else:
+                            crafting.next_step()
+
                 #Vérification de la nourriture
                 if crafting.get_status() ==2:
                     if command.config_bouffe():
@@ -233,7 +250,7 @@ def grafcet_craft():
                     else:
                         crafting.next_step()
                 
-                        #Vérification de la config pot
+                #Vérification de la config pot
                 if crafting.get_status() ==3:
                     if command.config_pot():
                         if verif_buff(command,pot,'x'):
@@ -244,7 +261,6 @@ def grafcet_craft():
                             logging.error("Pas de confirmation POT up")
                     else:
                          crafting.next_step()
-
 
                 #Lancement du craft
                 if crafting.get_status() ==4:
@@ -260,27 +276,12 @@ def grafcet_craft():
                         crafting.next_step()
                         pyautogui.press('a')
                         logging.info("macro lancé")
+
                 #attente fin
                 if crafting.get_status() ==6:
                     logging.debug("attente fin de craft")
                     if LOGFile.message_apparait("Vous fabriquez"):
                         crafting.next_step()
-
-                #Verification equipement non cassé
-                if crafting.get_status() ==1:
-                    if command.repa_button.get_value():
-                        logging.debug("Verification Reparation")
-                        if RechercheRepa.message_apparait("cassé",True):
-                            if reparation('v'):
-                                crafting.next_step()
-                            else:
-                                logging.error("reparation failed")
-                                crafting.change_status(0)
-                        else:
-                            crafting.next_step()
-                    else:
-                            crafting.next_step()
-
 
                 #Réinit et mise a jour données
                 if crafting.get_status()==7: 
@@ -291,10 +292,19 @@ def grafcet_craft():
                     if crafting.get_craft_restant()>0:
                         crafting.change_status(1)
                     else:
-                        if command.config_arret():
-                            shutdown_computer()
-                        else:
-                            crafting.change_status(0)
+                        crafting.change_status(99)
+        
+        #Gestion du time out
+        if crafting.get_status()==98:  
+            crafting.change_status(99)
+
+        #Fin de programme
+        if crafting.get_status()==99:
+            if command.config_arret():
+                shutdown_computer()
+            else:
+                crafting.change_status(0)
+
             
 ####Initialisation des variable
 config_Craft ={
