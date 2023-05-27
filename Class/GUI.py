@@ -23,6 +23,7 @@ class CustomCheckbutton:
 
     def get_value(self):
         return self.var.get()
+        
 
 #fenetre de commande principale
 class FenetreCommande:
@@ -165,7 +166,7 @@ class FenetreCommande:
             self.entry_craft.delete(0,tk.END)
             self.fenetre.focus_set()    
         else:
-            if self.crafting.get_craft_restant()>10:
+            if self.crafting.get_craft_restant()>0:
                 self.crafting.change_status(1)
             else:     
                 self.label_craft_restant.config(text="N'est pas entier")
@@ -174,7 +175,7 @@ class FenetreCommande:
         self.crafting.change_status(10)
 
     def test(self):
-        self.crafting.change_status(6)
+        self.crafting.need_repair = True
 
 
 

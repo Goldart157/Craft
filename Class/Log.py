@@ -9,7 +9,6 @@ class logFFXIV:
         self.fichier = fichier
         self.heure_message = datetime(1994,12,13,0,0,0)
         self.message = None
-        self.heure_message_prev = datetime(1994,12,13,0,0,0)
 
     def derniere_ligne_filtree(self,filtre,sans_validation=False): #Renvoie la dernière du fichier spécifi contenant le filtre
         with open(self.fichier, 'r', encoding='utf-8') as f:
@@ -58,6 +57,17 @@ class logFFXIV:
             return True
         else: 
             return False
+
+    def message_apparait_depuis_x_seconde(self,filtre,x=10):
+        if self.message_apparait(filtre):
+            delta = timedelta (seconds=x)
+            now =   datetime.now()
+            temp = self.heure_message
+            diff = now -temp
+            if diff < delta :
+                return True
+            else: 
+                return False
 
 
 

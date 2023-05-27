@@ -24,18 +24,10 @@ from Class.Log import *
 from Class.Craft import *
 
 
-
+logging.basicConfig( level=logging.DEBUG)
 ##### Gestion et lecture des log
 #Donnée 
-imageFabriquer = "./Ressources/bouton fabriquer.PNG"
-imageBuffCl = "./Ressources/BuffCl.PNG"
-imageBouffe = "./Ressources/ImageBouffe.PNG"
-imagePot = "./Ressources/buffPot.png"
-imageBoutonToutReparer = "./Ressources/bouton tout reparer.PNG"
-imageBoutonOui = "./Ressources/boutton oui.PNG"
-log = "C:/Users/Adrien/Documents/FFLOG"
-logging.basicConfig( level=logging.DEBUG)
-titre_fenetre = "Final Fantasy XIV" 
+
 
 def shutdown_computer():
     try:
@@ -44,14 +36,14 @@ def shutdown_computer():
     except subprocess.CalledProcessError as e:
         print("Une erreur s'est produite lors de l'arrêt de l'ordinateur :", e)
 
-def stop_program(e):
+#def stop_program(e):
    
-    if e.name == 'esc':
-        print("Arrêt du programme")
-        sys.exit() #Permet de stopper le programme a tout moment en appuyant sur echap
+#   if e.name == 'esc':
+#        print("Arrêt du programme")
+#       sys.exit() #Permet de stopper le programme a tout moment en appuyant sur echap
 
 # Attachez la fonction `stop_program` à l'événement de pression de touche
-keyboard.on_press(stop_program)
+#keyboard.on_press(stop_program)
 
 def chemin_document_plus_recent(dossier="C:/Users/Adrien/Documents/FFLOG"):
     fichiers = os.listdir(dossier)
@@ -106,14 +98,15 @@ def clique(x,y):
 
 ##### Fonction liées a FF
 
-def verif_buff(command,buff,touche_buff):
+#Vérifie si un buff est présent dans le cas contraire lance la séquence pour le faire
+def verif_buff(GUI,buff,touche_buff):
 
     global boutonFab
     #Vérification de l'état de la case config bouffe
     
     if buff.localiser_image():#Est ce que le buff est présent ? 
         
-        logging.info("buff Nourriture actif")
+        logging.debug("buff Nourriture actif")
         return True
        
     else:
@@ -139,7 +132,7 @@ def verif_buff(command,buff,touche_buff):
 
         if boutonFab.localiser_image() : #Si l'interface de craft est présente on valide
 
-            logging.error('refresh Food failed')
+            logging.debug('buff nourriture placé ')
             return True
 
         else:
@@ -149,18 +142,22 @@ def verif_buff(command,buff,touche_buff):
 
             if boutonFab.localiser_image() and buff.localiser_image() :
 
-                logging.error('refresh Food failed')
+                logging.debug('Deux buff placé return true')
                 return True
 
             else:
 
+                logging.error('refresh Food failed')
                 return False
-    
+
+#Répare le stuff in game    
 def reparation(touche_repa):
+
     logging.info("reparation a faire")
     global bouton_tout_reparer
     global bouton_oui
     global boutonFab
+
     sleep(2)
     if boutonFab.localiser_image():
         pyautogui.press('n')
@@ -187,15 +184,24 @@ def reparation(touche_repa):
 #Permet de réaliser un affichage en temps réel des données de craft 
 def update_status_GUI(): 
     global crafting
-    global command
+    global GUI
     global config_Craft
     while crafting.get_status() != 99:
         status = crafting.get_status()
-        command.update_status(status,config_Craft[status]["text"])
-        command.update_duree_restant(crafting.duree_craft_restante())
+        GUI.update_status(status,config_Craft[status]["text"])
+        GUI.update_duree_restant(crafting.duree_craft_restante())
+        GUI.label_Duree_restant.config(text=str(crafting.need_repair))
         sleep(0.5)
 
-        
+#Gestion des evenement
+def event_checker():
+    global lastFFLOGFile
+    LOGRepa = logFFXIV(lastFFLOGFile)
+    global crafting
+    while crafting.get_status() != 99:
+        sleep(0.2)
+        if LOGRepa.message_apparait_depuis_x_seconde("cassé") and crafting.get_status() >0 :
+            crafting.need_repair = True
 
         
 #Programme principal qui a en charge toute la gestion du craft
@@ -204,7 +210,7 @@ def grafcet_craft():
     #Déclaration Variable globale
     global crafting
     global t
-    global command
+    global GUI
     global boutonFab
     global bouffe
     global LOGFile
@@ -221,18 +227,23 @@ def grafcet_craft():
              logging.debug("boucle de craft ite")
 
              #Grafcet du programme
-             if int(crafting.craft_restant) >= 1 : 
+             if int(crafting.craft_restant) > 0 : 
 
                 #Verification equipement non cassé
                 if crafting.get_status() ==1:
-                    if command.repa_button.get_value()and False:#####Le déclencheur de réparation doit être refait
-                        logging.debug("Verification Reparation")
-                        if RechercheRepa.message_apparait("cassé",True):
+                    if GUI.repa_button.get_value():#####Le déclencheur de réparation doit être refait
+                        logging.info("Verification Reparation")
+
+
+                        if crafting.need_repair:#Condition géré sur la fonction d'évènement
+
                             if reparation('v'):
+                                crafting.need_repair = False
                                 crafting.next_step()
+
                             else:
                                 logging.error("reparation failed")
-                                crafting.change_status(0)
+                                crafting.change_status(97)
                         else:
                             crafting.next_step()
                     else:
@@ -240,8 +251,8 @@ def grafcet_craft():
 
                 #Vérification de la nourriture
                 if crafting.get_status() ==2:
-                    if command.config_bouffe():
-                        if verif_buff(command,bouffe,'c'):
+                    if GUI.config_bouffe():
+                        if verif_buff(GUI,bouffe,'c'):
                             crafting.next_step()
                             logging.info("Config Nourriture vérifiée")
                         else:
@@ -252,8 +263,8 @@ def grafcet_craft():
                 
                 #Vérification de la config pot
                 if crafting.get_status() ==3:
-                    if command.config_pot():
-                        if verif_buff(command,pot,'x'):
+                    if GUI.config_pot():
+                        if verif_buff(GUI,pot,'x'):
                             crafting.next_step()
                             logging.info("Config Pot vérifiée")
                         else:
@@ -271,7 +282,7 @@ def grafcet_craft():
                
                 #Lancement de la macro
                 if crafting.get_status() ==5 : 
-                    logging.debug("attente confirmation lancement craft")
+                   
                     if LOGFile.message_apparait("Vous commencez à fabrique"):
                         crafting.next_step()
                         pyautogui.press('a')
@@ -281,29 +292,47 @@ def grafcet_craft():
                 if crafting.get_status() ==6:
                     logging.debug("attente fin de craft")
                     if LOGFile.message_apparait("Vous fabriquez"):
+                        logging.info("Fin de craft ok")
                         crafting.next_step()
 
                 #Réinit et mise a jour données
                 if crafting.get_status()==7: 
 
                     crafting.moins_craft()
-                    command.update_craft_restant(int(crafting.craft_restant))
+                    GUI.update_craft_restant(int(crafting.craft_restant))
                     logging.info("craft finished")
                     if crafting.get_craft_restant()>0:
                         crafting.change_status(1)
+                        logging.info("next craft")
                     else:
-                        crafting.change_status(99)
+                        logging.info("fini")
+                        crafting.change_status(96)
         
+
+        #Choix fin d'execution
+        if crafting.get_status() ==96:
+            if GUI.config_arret():
+                crafting.change_status(99)
+            else:
+                crafting.change_status(0)
+
+
+        #Gestion d'erreur
+        if crafting.get_status()==97:
+            logging.error("erreur levée")
+            #crafting.change_status(0)
+
+
         #Gestion du time out
         if crafting.get_status()==98:  
-            crafting.change_status(99)
+   
+            logging.erreur("time out sur l'étape : "+str(crafting.get_status()))
+            #crafting.change_status(99)
 
         #Fin de programme
         if crafting.get_status()==99:
-            if command.config_arret():
+            if GUI.config_arret():
                 shutdown_computer()
-            else:
-                crafting.change_status(0)
 
             
 ####Initialisation des variable
@@ -344,34 +373,53 @@ config_Craft ={
        "time_out":None,
        "text":"Paused"
      },
+   97:{
+       "time_out":None,
+       "text":"Erreur"
+    },
+   98:{
+       "time_out":None,
+       "text":"time Out"
+     },
    99:{
        "time_out":None,
-       "text":"Paused"
+       "text":"Fin de programme"
      }  
   
 }
 
+#Lien vers les fichiers
+imageFabriquer = "./Ressources/bouton fabriquer.PNG"
+imageBuffCl = "./Ressources/BuffCl.PNG"
+imageBouffe = "./Ressources/ImageBouffe.PNG"
+imagePot = "./Ressources/buffPot.png"
+imageBoutonToutReparer = "./Ressources/bouton tout reparer.PNG"
+imageBoutonOui = "./Ressources/boutton oui.PNG"
+log = "C:/Users/Adrien/Documents/FFLOG"
+titre_fenetre = "Final Fantasy XIV" 
 
+#Initialisation
 lastFFLOGFile =  chemin_document_plus_recent(log)
 LOGFile = logFFXIV(lastFFLOGFile)
-RechercheRepa = logFFXIV(lastFFLOGFile)
 boutonFab = element_FFXIV(imageFabriquer)
 bouffe =element_FFXIV(imageBouffe)
 pot = element_FFXIV(imagePot)
 bouton_tout_reparer = element_FFXIV( imageBoutonToutReparer)
 bouton_oui = element_FFXIV(imageBoutonOui)
 crafting = craft(0,config_Craft)
-command = FenetreCommande(crafting)
+GUI = FenetreCommande(crafting)
 
 
 ###Multi Threading
 
-#threadFenetre = threading.Thread(target=command.run)
+#threadFenetre = threading.Thread(target=GUI.run)
 thread_craft = threading.Thread(target=grafcet_craft)
 thread_update_data_GUI = threading.Thread(target=update_status_GUI)
 thread_craft.start()
 thread_update_data_GUI.start()
+thread_event = threading.Thread(target=event_checker)
+thread_event.start()
 
-command.run()
+GUI.run()
 crafting.change_status(99)
 logging.debug("prout")
