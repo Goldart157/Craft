@@ -36,14 +36,6 @@ def shutdown_computer():
     except subprocess.CalledProcessError as e:
         print("Une erreur s'est produite lors de l'arrêt de l'ordinateur :", e)
 
-#def stop_program(e):
-   
-#   if e.name == 'esc':
-#        print("Arrêt du programme")
-#       sys.exit() #Permet de stopper le programme a tout moment en appuyant sur echap
-
-# Attachez la fonction `stop_program` à l'événement de pression de touche
-#keyboard.on_press(stop_program)
 
 def chemin_document_plus_recent(dossier="C:/Users/Adrien/Documents/FFLOG"):
     fichiers = os.listdir(dossier)
@@ -102,6 +94,7 @@ def clique(x,y):
 def verif_buff(GUI,buff,touche_buff):
 
     global boutonFab
+    global crafting
     #Vérification de l'état de la case config bouffe
     
     if buff.localiser_image():#Est ce que le buff est présent ? 
@@ -126,7 +119,8 @@ def verif_buff(GUI,buff,touche_buff):
         logging.debug("nourriture appuyée")
         sleep(3)
 
-        pyautogui.press('n') #Réouverture de l'interface crafteur
+         #Réouverture de l'interface crafteur
+        open_Craft()
         logging.debug("interface crafteur ouverte")
         sleep(3)
 
@@ -138,7 +132,7 @@ def verif_buff(GUI,buff,touche_buff):
         else:
 
             #Sinon on tente de l'ouvrir et on reregarde
-            pyautogui.press('n') 
+            open_Craft()
 
             if boutonFab.localiser_image() and buff.localiser_image() :
 
@@ -157,50 +151,68 @@ def reparation(touche_repa):
     global bouton_tout_reparer
     global bouton_oui
     global boutonFab
-
-    sleep(2)
+    global crafting
+    sleep(0.5) #Attente que la fenetre repop
     if boutonFab.localiser_image():
         pyautogui.press('n')
-    sleep(3)
+    sleep(3)#attente que le crafteur se leve
     pyautogui.press(touche_repa)
-    sleep(1)
+    sleep(0.5)#Apparition fenetre
     if  bouton_tout_reparer.localiser_image():
         logging.debug("bouton oui et tout réparé ok")
         bouton_tout_reparer.clique_droit_image()
-        sleep(1)
+        sleep(0.5)#Apparition fenetre
         if bouton_oui.localiser_image():
             bouton_oui.clique_droit_image()
             sleep(5)
             pyautogui.press(touche_repa)
-            sleep(1)
-            pyautogui.press('n')
-            sleep(1)
+            sleep(0.5)#Apparition fenetre
+            open_Craft()
+            sleep(0.5)#Apparition fenetre
             logging.info("equipement réparé")
             return True
         
     logging.debug("bouton oui ou bouton tout reparer non trouvé")
     return False
 
-#Permet de réaliser un affichage en temps réel des données de craft 
+#Réouverture fenetre Craft
+def open_Craft():
+    global crafting
+    global boutonFab
+
+    if not boutonFab.localiser_image():#Si on ne trouve pas le gui on le lance
+         keyboard.press('n')
+    if crafting.HQ.initialized:  
+        sleep(0.5)#Apparition fenetre
+        crafting.HQ.restore()
+        sleep(0.5)#Apparition fenetre
+
+#THREAD : Permet de réaliser un affichage en temps réel des données de craft 
 def update_status_GUI(): 
     global crafting
     global GUI
     global config_Craft
     while crafting.get_status() != 99:
         status = crafting.get_status()
-        GUI.update_status(status,config_Craft[status]["text"])
+        try:
+            GUI.update_status(status,config_Craft[status]["text"])
+        except:
+            GUI.update_status(status,"No Label")
         GUI.update_duree_restant(crafting.duree_craft_restante())
-        GUI.label_Duree_restant.config(text=str(crafting.need_repair))
+        #GUI.label_Duree_restant.config(text=str(crafting.need_repair))
         sleep(0.5)
 
-#Gestion des evenement
+#THREAD : Gestion des evenement
 def event_checker():
     global lastFFLOGFile
     LOGRepa = logFFXIV(lastFFLOGFile)
+    LOGEchoue = logFFXIV(lastFFLOGFile)
     global crafting
     while crafting.get_status() != 99:
-        sleep(0.2)
-        if LOGRepa.message_apparait_depuis_x_seconde("cassé") and crafting.get_status() >0 :
+        sleep(0.2)#Cadencement
+        if LOGEchoue.message_apparait_depuis_x_seconde("échoué"):
+            crafting.change_status(95)
+    if LOGRepa.message_apparait_depuis_x_seconde("cassé") and crafting.get_status() >0 :
             crafting.need_repair = True
 
         
@@ -218,7 +230,7 @@ def grafcet_craft():
 
     while crafting.get_status()!=99: #On fait la boucle tant que le statut n'est pas arret du programme (99)
 
-        sleep(2)
+        sleep(1)
         logging.info("Boucle Craft en attente")
 
         while crafting.get_status() > 0 and crafting.get_status() < 10: #on ne fait pas la boucle si le craft n'est pas lancé ou que le craft est pause
@@ -308,8 +320,14 @@ def grafcet_craft():
                         logging.info("fini")
                         crafting.change_status(96)
         
-        if crafting.get_status==90:
-
+        #Appel de la fonction enregistrer HQ
+        if crafting.get_status()==90:
+            crafting.HQ.record()
+            crafting.change_status(0)
+        #test
+        if crafting.get_status()==91:
+            open_Craft()
+            crafting.change_status(0)
 
         #Choix fin d'execution
         if crafting.get_status() ==96:
@@ -328,7 +346,7 @@ def grafcet_craft():
         #Gestion du time out
         if crafting.get_status()==98:  
    
-            logging.erreur("time out sur l'étape : "+str(crafting.get_status()))
+            logging.error("time out sur l'étape : "+str(crafting.get_status()))
             #crafting.change_status(99)
 
         #Fin de programme
@@ -344,31 +362,31 @@ config_Craft ={
        "text":"Attente de craft"
      },
    1:{
-       "time_out":None,
+       "time_out":40,
        "text":"Vérification Repa"
      },
    2:{
-       "time_out":None,
+       "time_out":40,
        "text":"Vérification Bouffe"
      },
    3:{
-       "time_out":None,
+       "time_out":40,
        "text":"Vérification Pot"
      },
    4:{
-       "time_out":None,
+       "time_out":20,
        "text":"Lancement Synthèse"
      },
    5:{
-       "time_out":None,
+       "time_out":20,
        "text":"Lancement Macro Craft"
      },
    6:{
-       "time_out":None,
+       "time_out":180,
        "text":"Attente fin craft"
      },
    7:{
-       "time_out":None,
+       "time_out":10,
        "text":"Reset et relancement"
      },
    10:{
@@ -377,8 +395,12 @@ config_Craft ={
      },
    90:{
        "time_out":None,
-       "text":"Config HQ - cliquez"
+       "text":"Config HQ - cliquez puis s"
     },
+   95:{
+       "time_out":None,
+       "text":"craft échoué détecté"
+   },
    97:{
        "time_out":None,
        "text":"Erreur"

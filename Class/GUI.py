@@ -22,8 +22,10 @@ class CustomCheckbutton:
             self.checkbutton["text"] = self.label+" Off"
 
     def get_value(self):
-        return self.var.get()
-        
+        try:
+            return self.var.get()
+        except:
+            pass
 
 #fenetre de commande principale
 class FenetreCommande:
@@ -60,8 +62,11 @@ class FenetreCommande:
         button_pause = tk.Button(self.fenetre, text="Pause", command= self.pause,width=10)  # , command=pause)
         button_pause.grid(row=3, column=2, padx=10, pady=5, sticky='ns')
 
-        button_stop = tk.Button(self.fenetre, text="HQ", command= self.test,width=10)  # , command=stop)
+        button_stop = tk.Button(self.fenetre, text="HQ", command= self.hq,width=10)  # , command=stop)
         button_stop.grid(row=4, column=2, padx=10, pady=5, sticky='ns')
+
+        button_test = tk.Button(self.fenetre, text="test", command= self.test,width=10)  # , command=stop)
+        button_test.grid(row=5, column=2, padx=10, pady=5, sticky='ns')
 
         # Séparateur après la deuxième colonne
         separator2 = ttk.Separator(self.fenetre, orient='vertical')
@@ -173,8 +178,10 @@ class FenetreCommande:
         
     def pause(self):
         self.crafting.change_status(10)
-
     def test(self):
+        self.crafting.change_status(91)
+
+    def hq(self):
         self.crafting.change_status(90)
 
 

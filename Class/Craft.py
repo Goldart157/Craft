@@ -6,8 +6,8 @@ lock = threading.Lock()
 import pygetwindow
 import keyboard
 import mouse
-
-
+from pynput.mouse import Listener
+import pyautogui
 class status():
     def __init__(self,config):
         self._value = 0
@@ -79,10 +79,12 @@ class HQ:
             logging.debug(f"({x}, {y}) clicked")
 
     def record(self):
+        self.clicks = []
         with Listener(on_click=self.on_click) as listener:
-            keyboard.wait('q')
+            keyboard.wait('s')
             listener.stop()
             self.initialized = True
+            listener=None
 
     def restore(self):
        
