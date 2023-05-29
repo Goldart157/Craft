@@ -4,6 +4,9 @@ import threading
 import datetime
 lock = threading.Lock()
 import pygetwindow
+import keyboard
+import mouse
+
 
 class status():
     def __init__(self,config):
@@ -62,7 +65,26 @@ class status():
         if not (stat > 0 and stat < 10):#Si le statut n'est pas compris dans la plage de mesure on dévalide la mesure.
             self.chrono_unvalid=True
 
-    
+
+class HQ:
+    def __init__(self):
+        self.right_clicks = []
+        self.initialized = False
+
+    def record(self, event):
+        if event.event_type == 'down' and event.button == 'right':
+            self.right_clicks.append((event.x, event.y))
+
+    def start_recording(self):
+        mouse.on_click(self.record)
+
+
+    def click_at_positions(self):
+        for position in self.right_clicks:
+            mouse.move(position[0], position[1], absolute=True, duration=0.1)
+            mouse.press(button='right')
+            time.sleep(0.25)  # Durée de pression de 250 ms
+            mouse.release(button='right')
 
             
 class craft:
@@ -71,6 +93,7 @@ class craft:
         self.craft_restant = int(craft)
         self._status = status(config)
         self.need_repair = False
+        self.HQ = HQ()
         
 
     def moins_craft(self): #Retire un craft
@@ -107,4 +130,4 @@ class craft:
 
         return None
 
-      
+
