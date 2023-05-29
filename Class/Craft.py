@@ -4,7 +4,10 @@ import threading
 import datetime
 lock = threading.Lock()
 import pygetwindow
-
+import keyboard
+import mouse
+from pynput.mouse import Listener
+import pyautogui
 class status():
     def __init__(self,config):
         self._value = 0
@@ -62,7 +65,38 @@ class status():
         if not (stat > 0 and stat < 10):#Si le statut n'est pas compris dans la plage de mesure on dévalide la mesure.
             self.chrono_unvalid=True
 
-    
+
+class HQ:
+    def __init__(self):
+        self.clicks = []
+        self.initialized = False
+
+    def on_click(self, x, y, button, pressed):
+        if str(button) == "Button.left" and pressed:
+            new_click = [{'x':x},{'y':y}]
+            self.clicks.append(new_click)
+            
+            logging.debug(f"({x}, {y}) clicked")
+
+    def record(self):
+        self.clicks = []
+        with Listener(on_click=self.on_click) as listener:
+            keyboard.wait('s')
+            listener.stop()
+            self.initialized = True
+            listener=None
+
+    def restore(self):
+       
+        for click in self.clicks:
+            print(self.clicks)
+            x = click[0]['x']
+            y = click[1]['y']
+            duration = 0.25  # Durée de pression de 250 ms
+            pyautogui.mouseDown(x, y, button='left')
+            sleep(duration)
+            pyautogui.mouseUp(x, y, button='left')
+            sleep(0.25)
 
             
 class craft:
@@ -71,6 +105,7 @@ class craft:
         self.craft_restant = int(craft)
         self._status = status(config)
         self.need_repair = False
+        self.HQ = HQ()
         
 
     def moins_craft(self): #Retire un craft
@@ -107,4 +142,4 @@ class craft:
 
         return None
 
-      
+
