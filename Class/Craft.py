@@ -68,23 +68,33 @@ class status():
 
 class HQ:
     def __init__(self):
-        self.right_clicks = []
+        self.clicks = []
         self.initialized = False
 
-    def record(self, event):
-        if event.event_type == 'down' and event.button == 'right':
-            self.right_clicks.append((event.x, event.y))
+    def on_click(self, x, y, button, pressed):
+        if str(button) == "Button.left" and pressed:
+            new_click = [{'x':x},{'y':y}]
+            self.clicks.append(new_click)
+            
+            logging.debug(f"({x}, {y}) clicked")
 
-    def start_recording(self):
-        mouse.on_click(self.record)
+    def record(self):
+        with Listener(on_click=self.on_click) as listener:
+            keyboard.wait('q')
+            listener.stop()
+            self.initialized = True
 
-
-    def click_at_positions(self):
-        for position in self.right_clicks:
-            mouse.move(position[0], position[1], absolute=True, duration=0.1)
-            mouse.press(button='right')
-            time.sleep(0.25)  # Durée de pression de 250 ms
-            mouse.release(button='right')
+    def restore(self):
+       
+        for click in self.clicks:
+            print(self.clicks)
+            x = click[0]['x']
+            y = click[1]['y']
+            duration = 0.25  # Durée de pression de 250 ms
+            pyautogui.mouseDown(x, y, button='left')
+            sleep(duration)
+            pyautogui.mouseUp(x, y, button='left')
+            sleep(0.25)
 
             
 class craft:

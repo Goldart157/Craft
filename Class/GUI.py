@@ -60,7 +60,7 @@ class FenetreCommande:
         button_pause = tk.Button(self.fenetre, text="Pause", command= self.pause,width=10)  # , command=pause)
         button_pause.grid(row=3, column=2, padx=10, pady=5, sticky='ns')
 
-        button_stop = tk.Button(self.fenetre, text="Test", command= self.test,width=10)  # , command=stop)
+        button_stop = tk.Button(self.fenetre, text="HQ", command= self.test,width=10)  # , command=stop)
         button_stop.grid(row=4, column=2, padx=10, pady=5, sticky='ns')
 
         # Séparateur après la deuxième colonne
@@ -175,7 +175,7 @@ class FenetreCommande:
         self.crafting.change_status(10)
 
     def test(self):
-        self.crafting.need_repair = True
+        self.crafting.change_status(90)
 
 
 

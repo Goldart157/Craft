@@ -308,6 +308,8 @@ def grafcet_craft():
                         logging.info("fini")
                         crafting.change_status(96)
         
+        if crafting.get_status==90:
+
 
         #Choix fin d'execution
         if crafting.get_status() ==96:
@@ -373,6 +375,10 @@ config_Craft ={
        "time_out":None,
        "text":"Paused"
      },
+   90:{
+       "time_out":None,
+       "text":"Config HQ - cliquez"
+    },
    97:{
        "time_out":None,
        "text":"Erreur"

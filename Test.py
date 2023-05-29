@@ -44,36 +44,43 @@ import pynput.mouse
 
 logging.basicConfig( level=logging.DEBUG)
 
-class test():
+import logging
+from pynput.mouse import Listener
+import pyautogui
+from time import sleep
+
+class HQ:
     def __init__(self):
         self.clicks = []
-        self.initialisated = False
-    
-    #Evenement
-    def on_click(self,x,y,button,pressed):
-        with lock:
-            if str(button) == "Button.left" and pressed:
-                coord = {x,y}
-                self.clicks.append(coord)
-                logging.debug(str(x)+","+str(y)+" clicked")
+        self.initialized = False
+
+    def on_click(self, x, y, button, pressed):
+        if str(button) == "Button.left" and pressed:
+            new_click = [{'x':x},{'y':y}]
+            self.clicks.append(new_click)
+            
+            logging.debug(f"({x}, {y}) clicked")
 
     def record(self):
         with Listener(on_click=self.on_click) as listener:
-            keyboard.wait("a")
+            keyboard.wait('a')
             listener.stop()
-            intialisated=True
-
+            self.initialized = True
 
     def restore(self):
-        for coord in self.clicks:
-            y,x = coord
-            duree_pression = 250/1000
+       
+        for click in self.clicks:
+            print(self.clicks)
+            x = click[0]['x']
+            y = click[1]['y']
+            duration = 0.25  # Durée de pression de 250 ms
             pyautogui.mouseDown(x, y, button='left')
-            sleep(duree_pression)
+            sleep(duration)
             pyautogui.mouseUp(x, y, button='left')
             sleep(1)
-T=test()
+T=Test()
 T.record()
+keyboard.wait('a')
 T.restore()
 
 
@@ -85,7 +92,7 @@ def clique(coordinates):
         sleep(duree_pression)
         pyautogui.mouseUp(x, y, button='left')
         sleep(1)
-print(test)     
+    
 #clique(test)
 
 

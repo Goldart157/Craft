@@ -5,7 +5,7 @@
     <ProjectGuid>932ea77d-4c48-4e1f-b39c-ac9e43067af5</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>Test.py</StartupFile>
+    <StartupFile>CraftExe.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
