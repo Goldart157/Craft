@@ -15,13 +15,12 @@ import threading
 from time import sleep
 
 
-sys.path.append('C:/Users/Adrien/Documents/1_Documents/Script Python/craft/PythonApplication1/Class')
 
 #### Class Custom
-from Class.GUI import *
-from Class.Image import *
-from Class.Log import *
-from Class.Craft import *
+from GUI import *
+from Image import *
+from Log import *
+from Craft import *
 
 
 logging.basicConfig( level=logging.DEBUG)
@@ -31,11 +30,11 @@ logging.basicConfig( level=logging.DEBUG)
 
 def shutdown_computer():
     try:
+        sleep(10)
         subprocess.run(["shutdown", "/s","/f", "/t", "0"], shell=True)
         print("Arrêt de l'ordinateur en cours...")
     except subprocess.CalledProcessError as e:
         print("Une erreur s'est produite lors de l'arrêt de l'ordinateur :", e)
-
 
 def chemin_document_plus_recent(dossier="C:/Users/Adrien/Documents/FFLOG"):
     fichiers = os.listdir(dossier)
@@ -148,21 +147,29 @@ def verif_buff(GUI,buff,touche_buff):
 def reparation(touche_repa):
 
     logging.info("reparation a faire")
+
     global bouton_tout_reparer
     global bouton_oui
     global boutonFab
     global crafting
+
     sleep(0.5) #Attente que la fenetre repop
     if boutonFab.localiser_image():
         pyautogui.press('n')
+
     sleep(3)#attente que le crafteur se leve
     pyautogui.press(touche_repa)
+
     sleep(0.5)#Apparition fenetre
+
     if  bouton_tout_reparer.localiser_image():
+
         logging.debug("bouton oui et tout réparé ok")
         bouton_tout_reparer.clique_droit_image()
         sleep(0.5)#Apparition fenetre
+
         if bouton_oui.localiser_image():
+
             bouton_oui.clique_droit_image()
             sleep(5)
             pyautogui.press(touche_repa)
@@ -192,6 +199,7 @@ def update_status_GUI():
     global crafting
     global GUI
     global config_Craft
+
     while crafting.get_status() != 99:
         status = crafting.get_status()
         try:
@@ -204,15 +212,19 @@ def update_status_GUI():
 
 #THREAD : Gestion des evenement
 def event_checker():
+
     global lastFFLOGFile
+    global crafting
+
     LOGRepa = logFFXIV(lastFFLOGFile)
     LOGEchoue = logFFXIV(lastFFLOGFile)
-    global crafting
+    
     while crafting.get_status() != 99:
         sleep(0.2)#Cadencement
         if LOGEchoue.message_apparait_depuis_x_seconde("échoué"):
             crafting.change_status(95)
-    if LOGRepa.message_apparait_depuis_x_seconde("cassé") and crafting.get_status() >0 :
+
+        if LOGRepa.message_apparait_depuis_x_seconde("cassé") and crafting.get_status() >0 :
             crafting.need_repair = True
 
         
@@ -440,11 +452,16 @@ GUI = FenetreCommande(crafting)
 
 ###Multi Threading
 
-#threadFenetre = threading.Thread(target=GUI.run)
+#thread Grafcet craft
 thread_craft = threading.Thread(target=grafcet_craft)
-thread_update_data_GUI = threading.Thread(target=update_status_GUI)
 thread_craft.start()
+
+#Thread GUI
+thread_update_data_GUI = threading.Thread(target=update_status_GUI)
 thread_update_data_GUI.start()
+
+
+#Thread evenement
 thread_event = threading.Thread(target=event_checker)
 thread_event.start()
 

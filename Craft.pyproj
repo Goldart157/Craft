@@ -6,8 +6,7 @@
     <ProjectHome>
     </ProjectHome>
     <StartupFile>CraftExe.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>Ressources;Class</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Craft</Name>
