@@ -14,13 +14,13 @@ import io
 import threading
 from time import sleep
 
-
+sys.path.append('C:/Users/Adrien/source/repos/Goldart157/Craft/Class')
 
 #### Class Custom
-from GUI import *
-from Image import *
-from Log import *
-from Craft import *
+from Class.GUI import *
+from Class.Image import *
+from Class.Log import *
+from Class.Craft import *
 
 
 logging.basicConfig( level=logging.DEBUG)
@@ -353,13 +353,15 @@ def grafcet_craft():
         if crafting.get_status()==97:
             logging.error("erreur levée")
             #crafting.change_status(0)
-
+            sleep(300)
+            crafting.change_status(96)
 
         #Gestion du time out
         if crafting.get_status()==98:  
    
             logging.error("time out sur l'étape : "+str(crafting.get_status()))
-            #crafting.change_status(99)
+            sleep(300)
+            crafting.change_status(96)            #crafting.change_status(99)
 
         #Fin de programme
         if crafting.get_status()==99:
