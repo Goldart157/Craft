@@ -98,7 +98,7 @@ def verif_buff(GUI,buff,touche_buff):
     
     if buff.localiser_image():#Est ce que le buff est présent ? 
         
-        logging.debug("buff Nourriture actif")
+        logging.info("Vérification nourriture: buff  actif")
         return True
        
     else:
@@ -125,7 +125,7 @@ def verif_buff(GUI,buff,touche_buff):
 
         if boutonFab.localiser_image() : #Si l'interface de craft est présente on valide
 
-            logging.debug('buff nourriture placé ')
+            logging.info('Verif : buff mit placé ')
             return True
 
         else:
@@ -135,7 +135,7 @@ def verif_buff(GUI,buff,touche_buff):
 
             if boutonFab.localiser_image() and buff.localiser_image() :
 
-                logging.debug('Deux buff placé return true')
+                logging.info("Vérification nourriture: buff  actif")
                 return True
 
             else:
@@ -186,9 +186,11 @@ def reparation(touche_repa):
 def open_Craft():
     global crafting
     global boutonFab
+    logging.info('ouverture fenetre de craft')
 
     if not boutonFab.localiser_image():#Si on ne trouve pas le gui on le lance
          keyboard.press('n')
+         
     if crafting.HQ.initialized:  
         sleep(0.5)#Apparition fenetre
         crafting.HQ.restore()
