@@ -2,6 +2,33 @@ from datetime import datetime, time,timedelta
 from time import sleep
 import re
 import logging
+import os
+
+def chemin_document_plus_recent(dossier="C:/Users/Adrien/Documents/FFLOG"):
+    fichiers = os.listdir(dossier)
+    if not fichiers: #Si le dossier est mauvais
+        logging.error("Le dossier log n'est pas valide ")
+        return None
+    
+    chemin_plus_recent = None
+    date_plus_recente = None
+    
+    for fichier in fichiers:
+        chemin = os.path.join(dossier, fichier)
+
+        if os.path.isfile(chemin):
+
+
+            date_modification = os.path.getmtime(chemin)
+
+            #Si le chemin est plus récent on le sauvegarde
+            if date_plus_recente is None or date_modification > date_plus_recente:
+                date_plus_recente = date_modification
+                chemin_plus_recent = chemin
+
+    logging.info("Le fichier FFLOG trouvé est :"+chemin_plus_recent)
+
+    return chemin_plus_recent #Renvoie le fichier le plus récent d'un dossier
 
 class logFFXIV:
 
@@ -68,8 +95,6 @@ class logFFXIV:
                 return True
             else: 
                 return False
-
-
 
 class craft:
     def __init__(self,craft):

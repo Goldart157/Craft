@@ -5,7 +5,7 @@
     <ProjectGuid>932ea77d-4c48-4e1f-b39c-ac9e43067af5</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>CraftExe.py</StartupFile>
+    <StartupFile>CraftExe.pyw</StartupFile>
     <SearchPath>Ressources;Class</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -27,7 +27,7 @@
     <Compile Include="Class\GUI.py" />
     <Compile Include="Class\Image.py" />
     <Compile Include="Class\Log.py" />
-    <Compile Include="CraftExe.py" />
+    <Compile Include="CraftExe.pyw" />
     <Compile Include="Test.py">
       <SubType>Code</SubType>
     </Compile>
@@ -44,8 +44,13 @@
     <Content Include="Class\__pycache__\Image.cpython-37.pyc" />
     <Content Include="Class\__pycache__\Log.cpython-37.pyc" />
     <Content Include="Ressources\bouton fabriquer.PNG" />
+    <Content Include="Ressources\bouton tout reparer.PNG" />
+    <Content Include="Ressources\boutton oui.PNG" />
     <Content Include="Ressources\BuffCl.PNG" />
+    <Content Include="Ressources\buffPot.png" />
     <Content Include="Ressources\ImageBouffe.PNG" />
+    <Content Include="Ressources\ouisymb.PNG" />
+    <Content Include="Ressources\Symbiose100.PNG" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Class\" />
