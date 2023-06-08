@@ -94,7 +94,7 @@ def verif_buff(GUI,buff,touche_buff):
         sleep(3)
 
         if boutonFab.localiser_image() : #Si l'interface de craft est présente on valide
-
+            crafting.need_waiting = True
             logging.info('Verif : buff mit placé ')
             return True
 
@@ -104,7 +104,7 @@ def verif_buff(GUI,buff,touche_buff):
             open_Craft()
 
             if boutonFab.localiser_image() and buff.localiser_image() :
-
+                crafting.need_waiting = True
                 logging.info("Vérification nourriture: buff  actif")
                 return True
 
@@ -145,6 +145,7 @@ def reparation(touche_repa):
             open_Craft()
             sleep(0.5)#Apparition fenetre
             logging.info("equipement réparé")
+            crafting.need_waiting = True
             return True
         
     logging.debug("bouton oui ou bouton tout reparer non trouvé")
@@ -258,12 +259,13 @@ def grafcet_craft():
     global bouffe
     global LOGFile
     global pot
+    
 
     while crafting.get_status()!=99: # On fait la boucle tant que le statut n'est pas arret du programme (99)
-
+        crafting.need_waiting = True # On attend que le crafteur se prépare 
         sleep(1)
         logging.info("Boucle Craft en attente")
-
+        
         #### Grafcet du programme EN MODE CRAFT #####
         while crafting.get_status() > 0 and crafting.get_status() < 10: # on ne fait pas la boucle si le craft n'est pas lancé ou que le craft est pause
 
@@ -320,16 +322,20 @@ def grafcet_craft():
                 if crafting.get_status() ==4:
                     if boutonFab.localiser_image() :
                         boutonFab.clique_droit_image()
-                        crafting.next_step()
                         logging.info("Bouton fab cliqué")
-               
+                        crafting.next_step()
+                     
                 ## Lancement de la macro
                 if crafting.get_status() ==5 : 
                    
                     if LOGFile.message_apparait("Vous commencez à fabrique"):
-                        crafting.next_step()
+
+                        if crafting.need_waiting:
+                            crafting.need_waiting = False
+                            sleep(2)
                         pyautogui.press('a')
                         logging.info("macro lancé")
+                        crafting.next_step()
 
                 ## attente fin
                 if crafting.get_status() ==6:
