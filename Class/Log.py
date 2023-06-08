@@ -54,14 +54,14 @@ class logFFXIV:
                         if  temp_heure_message > self.heure_message:
                             self.heure_message = temp_heure_message
                             self.message = ligne #On enregistre le message dans l'element
-                            logging.info("Trouvé ligne :"+ligne)
+                            logging.debug("Trouvé ligne :"+ligne)
                             return self.message 
                         else: 
                             logging.debug("heure message actuel < a h dernier message lu: None returned")
                     else:
                         if datetime.now() - temp_heure_message > timedelta(minutes=2):
                             self.message = ligne #On enregistre le message dans l'element
-                            logging.info("Trouvé ligne :"+ligne)
+                            logging.debug("Trouvé ligne :"+ligne)
                             return self.message 
         return None
 

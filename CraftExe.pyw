@@ -23,13 +23,14 @@ from Class.Log import *
 from Class.Craft import *
 
 
+logging.basicConfig( level=logging.INFO)
+##### Gestion et lecture des log
+#Donnée 
 
 sys.path.append('C:/Users/Adrien/source/repos/Goldart157/Craft/Class')
 logging.basicConfig( level=logging.ERROR)
 
-
-
-####### Fonction diverses #######
+###### Fonction diverses
            
 def bool_to_str(value):
     if value:
@@ -71,7 +72,7 @@ def verif_buff(GUI,buff,touche_buff):
     
     if buff.localiser_image():#Est ce que le buff est présent ? 
         
-        logging.info("Vérification nourriture: buff  actif")
+        logging.info("Verif buff: buff  actif")
         return True
        
     else:
@@ -89,7 +90,7 @@ def verif_buff(GUI,buff,touche_buff):
         sleep(3)
 
          #Réouverture de l'interface crafteur
-        open_Craft()
+        open_craft()
         logging.debug("interface crafteur ouverte")
         sleep(3)
 
@@ -101,7 +102,7 @@ def verif_buff(GUI,buff,touche_buff):
         else:
 
             #Sinon on tente de l'ouvrir et on reregarde
-            open_Craft()
+            open_craft()
 
             if boutonFab.localiser_image() and buff.localiser_image() :
                 crafting.need_waiting = True
@@ -110,7 +111,7 @@ def verif_buff(GUI,buff,touche_buff):
 
             else:
 
-                logging.error('refresh Food failed')
+                logging.error('Verif : refresh buff failed')
                 return False
 
 ## Répare le stuff in game    
@@ -142,20 +143,20 @@ def reparation(touche_repa):
             sleep(5)
             pyautogui.press(touche_repa)
             sleep(0.5)#Apparition fenetre
-            open_Craft()
+            open_craft()
             sleep(0.5)#Apparition fenetre
             logging.info("equipement réparé")
             crafting.need_waiting = True
             return True
         
-    logging.debug("bouton oui ou bouton tout reparer non trouvé")
+    logging.debug("Réparation: bouton oui ou bouton \" tout reparer \" non trouvé")
     return False
 
 ## Réouverture fenetre Craft
-def open_Craft():
+def open_craft():
     global crafting
     global boutonFab
-    logging.info('ouverture fenetre de craft')
+    logging.info('open_craft: ouverture fenetre de craft')
 
     if not boutonFab.localiser_image():#Si on ne trouve pas le gui on le lance
         keyboard.press('n')
@@ -210,9 +211,8 @@ def symbiose(touche_symb='<'):
 
         sleep(3)
 
-    
+    return  open_craft()
 
-#    return  open_Craft()
 ####### Gestion UI et évenement #######
 
 ## THREAD : Permet de réaliser un affichage en temps réel des données de craft 
@@ -270,16 +270,14 @@ def grafcet_craft():
         while crafting.get_status() > 0 and crafting.get_status() < 10: # on ne fait pas la boucle si le craft n'est pas lancé ou que le craft est pause
 
              sleep(1)
-             logging.debug("boucle de craft ite")
+             logging.debug("CraftExe: Crafting en cours")
 
              if int(crafting.craft_restant) > 0 : 
 
                 ## Verification equipement non cassé
                 if crafting.get_status() ==1:
                     if GUI.repa_button.get_value():#####Le déclencheur de réparation doit être refait
-                        logging.info("Verification Reparation")
-
-
+                        logging.info("Craft Exe : Vérification Réparation")
                         if crafting.need_repair:#Condition géré sur la fonction d'évènement
 
                             if reparation('v'):
@@ -287,7 +285,7 @@ def grafcet_craft():
                                 crafting.next_step()
 
                             else:
-                                logging.error("reparation failed")
+                                logging.error("CraftExe: reparation failed")
                                 crafting.change_status(97)
                         else:
                             crafting.next_step()
@@ -297,24 +295,26 @@ def grafcet_craft():
                 ## Vérification de la nourriture
                 if crafting.get_status() ==2:
                     if GUI.config_bouffe():
+                        logging.info("CraftExe: Vérfication nouriture")
                         if verif_buff(GUI,bouffe,'c'):
                             crafting.next_step()
-                            logging.info("Config Nourriture vérifiée")
+                           
                         else:
-                            crafting.status=0
-
+                            crafting.change_status(97)
+                            
                     else:
                         crafting.next_step()
                 
                 ## Vérification de la config pot
-                if crafting.get_status() ==3:
+                if crafting.get_status() == 3:
                     if GUI.config_pot():
+                        logging.info("CraftExe : Vérification Pot")
                         if verif_buff(GUI,pot,'x'):
                             crafting.next_step()
-                            logging.info("Config Pot vérifiée")
+                            
                         else:
-                            crafting.status=0
-                            logging.error("Pas de confirmation POT up")
+                            crafting.change_status(97)
+                            
                     else:
                          crafting.next_step()
 
@@ -341,20 +341,20 @@ def grafcet_craft():
                 if crafting.get_status() ==6:
                     logging.debug("attente fin de craft")
                     if LOGFile.message_apparait("Vous fabriquez"):
-                        logging.info("Fin de craft ok")
+                        logging.info("CraftExe : Fin de craft ok")
                         crafting.next_step()
 
-                #Réinit et mise a jour données
+                ## Réinit et mise a jour données
                 if crafting.get_status()==7: 
 
                     crafting.moins_craft()
                     GUI.update_craft_restant(int(crafting.craft_restant))
-                    logging.info("craft finished")
+                    logging.info("CraftExe : craft finished")
                     if crafting.get_craft_restant()>0:
                         crafting.change_status(1)
-                        logging.info("next craft")
+                        logging.info("CraftExe : next craft")
                     else:
-                        logging.info("fini")
+                        logging.info("CraftExe : fini")
                         crafting.change_status(96)
         
         
@@ -370,7 +370,7 @@ def grafcet_craft():
             print(str(symb100.localiser_image()))
             symbiose()
             #reparation('v')
-            #open_Craft()
+            #open_craft()
             crafting.change_status(0)
 
         ## Choix fin d'execution

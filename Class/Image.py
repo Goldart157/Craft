@@ -17,7 +17,8 @@ class element_FFXIV: #Element pour recherche d'image
         self.region = self.obtenir_region_application()
         self.coord_x = 0
         self.coord_y = 0
-        self.hwnd = self.windows._hWnd
+        if self.windows is not None:
+            self.hwnd = self.windows._hWnd
         
     def obtenir_region_application(self,application="Final Fantasy XIV"):
         try:
@@ -31,7 +32,7 @@ class element_FFXIV: #Element pour recherche d'image
             #self.region = x, y, largeur, hauteur
             return x,y,largeur,hauteur
         except IndexError:
-            logging.error("La fenetre de l'application n'a pas été trouvée.")
+            logging.error("Element FF14: La fenetre de l'application n'a pas été trouvée.")
             return None
         except Exception as e:
             logging.error("Une erreur s'est produite lors de l'obtention de la région de l'application:")
