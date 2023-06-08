@@ -25,6 +25,8 @@ class status():
         self.chrono()
 
         if new_value != self._value:
+
+            logging.info("New Status :"+str(new_value))
             
             if self._timer is not None:
                 self._timer.cancel()
@@ -47,6 +49,7 @@ class status():
                 self._value=new_value
     
     def timeout_handler(self): #Réinitialise le status si time_out 
+        logging.error("status:Time Out")
         with lock:
             self._value = 98
 
@@ -55,7 +58,6 @@ class status():
 
     def chrono(self):
         stat= self.return_status()
-        logging.debug(str())
 
         if stat==1: 
             self.heure_init = datetime.datetime.now()
@@ -67,7 +69,7 @@ class status():
         if not (stat > 0 and stat < 10):#Si le statut n'est pas compris dans la plage de mesure on dévalide la mesure.
             self.chrono_unvalid=True
 
-
+#Permet le record de la config HQ du craft
 class HQ:
     def __init__(self):
         self.clicks = []
@@ -81,6 +83,7 @@ class HQ:
             logging.debug(f"({x}, {y}) clicked")
 
     def record(self):
+        logging.info("Record Click Started")
         self.clicks = []
         with Listener(on_click=self.on_click) as listener:
             keyboard.wait('s')
@@ -95,12 +98,13 @@ class HQ:
             x = click[0]['x']
             y = click[1]['y']
             duration = 0.25  # Durée de pression de 250 ms
+            logging.debug("click on x:"+str(x)+",y: "+str(y))
             pyautogui.mouseDown(x, y, button='left')
             sleep(duration)
             pyautogui.mouseUp(x, y, button='left')
             sleep(0.25)
 
-            
+#Class qui contient toutes les données relative au craft            
 class craft:
     def __init__(self,craft,config):
         self.craft = craft
@@ -122,7 +126,7 @@ class craft:
             if temp !=  self.get_status():
                 self._status.status_change(new_status)
             else:
-                logging.debug("statut n'as pas été changé")
+                logging.debug("Changement de status demandé mais refusé car ancien = nouveau")
 
     def get_status(self):
 
@@ -140,6 +144,7 @@ class craft:
         if duree_craft is not None:
 
             duree_craft = duree_craft * self.craft_restant
+            logging.debug(str(duree_craft))
             return duree_craft
 
         return None

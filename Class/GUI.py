@@ -18,8 +18,10 @@ class CustomCheckbutton:
     def update_label(self, *args):
         if self.var.get():
             self.checkbutton["text"] = self.label+" On"
+            logging.info(self.label + "On")
         else:
             self.checkbutton["text"] = self.label+" Off"
+            logging.info(self.label + "Off")
 
     def get_value(self):
         try:
