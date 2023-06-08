@@ -7,7 +7,7 @@
     </ProjectHome>
     <StartupFile>CraftExe.pyw</StartupFile>
     <SearchPath>Ressources;Class</SearchPath>
-    <WorkingDirectory>Craft</WorkingDirectory>
+    <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Craft</Name>
     <RootNamespace>PythonApplication1</RootNamespace>
