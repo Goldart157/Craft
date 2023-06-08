@@ -27,7 +27,9 @@
     <Compile Include="Class\GUI.py" />
     <Compile Include="Class\Image.py" />
     <Compile Include="Class\Log.py" />
-    <Compile Include="CraftExe.pyw" />
+    <Compile Include="CraftExe.pyw">
+      <Publish>True</Publish>
+    </Compile>
     <Compile Include="Test.py">
       <SubType>Code</SubType>
     </Compile>

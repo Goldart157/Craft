@@ -108,7 +108,7 @@ class craft:
         self._status = status(config)
         self.need_repair = False
         self.HQ = HQ()
-        
+        self.need_waiting = True
 
     def moins_craft(self): #Retire un craft
         self.craft_restant = self.craft_restant-1
