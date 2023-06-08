@@ -82,25 +82,4 @@ class craft:
     def get_craft_restant(self):
         return self.craft_restant
             
-class time_out:
-    def __init__(self,Timer=0,activate=True):
-       self.test = False
-       self.value = Timer
-       self.activate =activate
-       self.ini_value = Timer
-    def timer(self):
-       if not self.activate:
-          return False  
-       sleep(1)
-       self.value=self.value-1
-       if self.value <=0:
-           logging.debug("timeout")
-           self.test =  True
-           return True
-       else:
-           return False
-
-    def reset(self):
-        self.test = False
-        self.value = self.ini_value
 

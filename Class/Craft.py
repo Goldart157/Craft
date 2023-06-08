@@ -8,6 +8,7 @@ import keyboard
 import mouse
 from pynput.mouse import Listener
 import pyautogui
+
 class status():
     def __init__(self,config):
         self._value = 0
@@ -24,6 +25,7 @@ class status():
         self.chrono()
 
         if new_value != self._value:
+            
             if self._timer is not None:
                 self._timer.cancel()
 

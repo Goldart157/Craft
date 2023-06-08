@@ -23,7 +23,7 @@ from Class.Log import *
 from Class.Craft import *
 
 
-logging.basicConfig( level=logging.DEBUG)
+logging.basicConfig( level=logging.ERROR)
 ##### Gestion et lecture des log
 #Donnée 
 
@@ -362,7 +362,10 @@ def grafcet_craft():
         if crafting.get_status()==98:  
    
             logging.error("time out sur l'étape : "+str(crafting.get_status()))
-            sleep(300)
+            i=0
+            while i<300 and crafting.get_status()==98:
+                i=i+1
+                sleep(1)
             crafting.change_status(96)            #crafting.change_status(99)
 
         #Fin de programme
@@ -398,7 +401,7 @@ config_Craft ={
        "text":"Lancement Macro Craft"
      },
    6:{
-       "time_out":180,
+       "time_out":200,
        "text":"Attente fin craft"
      },
    7:{
