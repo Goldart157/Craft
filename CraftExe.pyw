@@ -190,10 +190,11 @@ def symbiose(touche_symb='<'):
     global symb100
     global bouton_oui_symb
 
-    #close_craft()
+
+    close_craft()
 
     #Ouverture de la fenetre de symbiose
-    #pyautogui.press(touche_symb)
+    pyautogui.press(touche_symb)
     logging.debug("Symbiose:Ouverture fenetre symbiose")
 
     while symb100.localiser_image():
@@ -239,14 +240,22 @@ def event_checker():
 
     LOGRepa = logFFXIV(lastFFLOGFile)
     LOGEchoue = logFFXIV(lastFFLOGFile)
-    
+    LOGSymp = logFFXIV(lastFFLOGFile)
+
     while crafting.get_status() != 99:
         sleep(0.2)#Cadencement
         if LOGEchoue.message_apparait_depuis_x_seconde("échoué"):
             crafting.change_status(95)
+        
+        current_status = crafting.get_status()
+        validation_verif =  (current_status < 10 and current_status > 0) or current_status == 91
 
-        if LOGRepa.message_apparait_depuis_x_seconde("cassé") and crafting.get_status() >0 :
+        if LOGRepa.message_apparait_depuis_x_seconde("cassé") and validation_verif : 
             crafting.need_repair = True  
+
+        if LOGSymp.message_apparait_depuis_x_seconde("symbiose") and  validation_verif :
+            crafting.need_material = True
+            crafting.change_status(10)
 
 ####### Programme principal qui a en charge toute la gestion du craft #######
 def grafcet_craft():
@@ -275,7 +284,7 @@ def grafcet_craft():
              if int(crafting.craft_restant) > 0 : 
 
                 ## Verification equipement non cassé
-                if crafting.get_status() ==1:
+                if crafting.get_status() == 1:
                     if GUI.repa_button.get_value():#####Le déclencheur de réparation doit être refait
                         logging.info("Craft Exe : Vérification Réparation")
                         if crafting.need_repair:#Condition géré sur la fonction d'évènement
@@ -292,8 +301,26 @@ def grafcet_craft():
                     else:
                             crafting.next_step()
 
+                ## Verification besoin materialisation
+                if crafting.get_status() == 2:
+                    if GUI.materialize_button.get_value():#####Le déclencheur à refaire
+                        logging.info("Craft Exe : Vérification Matérialisation")
+                        if crafting.need_material:#Condition géré sur la fonction d'évènement
+
+                            if symbiose('v'):
+                                crafting.need_material = False
+                                crafting.next_step()
+
+                            else:
+                                logging.error("CraftExe: materialisation failed")
+                                crafting.change_status(97)
+                        else:
+                            crafting.next_step()
+                    else:
+                            crafting.next_step()
+
                 ## Vérification de la nourriture
-                if crafting.get_status() ==2:
+                if crafting.get_status() == 3:
                     if GUI.config_bouffe():
                         logging.info("CraftExe: Vérfication nouriture")
                         if verif_buff(GUI,bouffe,'c'):
@@ -306,7 +333,7 @@ def grafcet_craft():
                         crafting.next_step()
                 
                 ## Vérification de la config pot
-                if crafting.get_status() == 3:
+                if crafting.get_status() == 4:
                     if GUI.config_pot():
                         logging.info("CraftExe : Vérification Pot")
                         if verif_buff(GUI,pot,'x'):
@@ -319,14 +346,14 @@ def grafcet_craft():
                          crafting.next_step()
 
                 ## Lancement du craft
-                if crafting.get_status() ==4:
+                if crafting.get_status() == 5:
                     if boutonFab.localiser_image() :
                         boutonFab.clique_droit_image()
                         logging.info("Bouton fab cliqué")
                         crafting.next_step()
                      
                 ## Lancement de la macro
-                if crafting.get_status() ==5 : 
+                if crafting.get_status() == 6: 
                    
                     if LOGFile.message_apparait("Vous commencez à fabrique"):
 
@@ -338,21 +365,21 @@ def grafcet_craft():
                         crafting.next_step()
 
                 ## attente fin
-                if crafting.get_status() ==6:
+                if crafting.get_status() == 7:
                     logging.debug("attente fin de craft")
                     if LOGFile.message_apparait("Vous fabriquez"):
                         logging.info("CraftExe : Fin de craft ok")
                         crafting.next_step()
 
                 ## Réinit et mise a jour données
-                if crafting.get_status()==7: 
+                if crafting.get_status() == 8: 
 
                     crafting.moins_craft()
                     GUI.update_craft_restant(int(crafting.craft_restant))
                     logging.info("CraftExe : craft finished")
                     if crafting.get_craft_restant()>0:
-                        crafting.change_status(1)
                         logging.info("CraftExe : next craft")
+                        crafting.change_status(1)
                     else:
                         logging.info("CraftExe : fini")
                         crafting.change_status(96)
@@ -414,26 +441,30 @@ config_Craft ={
        "text":"Vérification Repa"
      },
    2:{
-       "time_out":40,
-       "text":"Vérification Bouffe"
+       "time_out":60,
+       "text":"Vérification Symbiose"
      },
    3:{
        "time_out":40,
-       "text":"Vérification Pot"
+       "text":"Vérification Bouffe"
      },
    4:{
-       "time_out":20,
-       "text":"Lancement Synthèse"
+       "time_out":40,
+       "text":"Vérification Pot"
      },
    5:{
        "time_out":20,
-       "text":"Lancement Macro Craft"
+       "text":"Lancement Synthèse"
      },
    6:{
+       "time_out":20,
+       "text":"Lancement Macro Craft"
+     },
+   7:{
        "time_out":200,
        "text":"Attente fin craft"
      },
-   7:{
+   8:{
        "time_out":10,
        "text":"Reset et relancement"
      },
