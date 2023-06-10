@@ -20,7 +20,7 @@ class status():
         self.heure_init = None
         self.duree_cycle = None
         self.chrono_unvalid = False
-
+        
     def status_change(self,statut):
         new_value = int(statut)
         self.chrono()
@@ -114,6 +114,7 @@ class craft:
         self.need_repair = False
         self.HQ = HQ()
         self.need_waiting = True
+        self.need_material = False
 
     def moins_craft(self): #Retire un craft
         self.craft_restant = self.craft_restant-1
