@@ -253,7 +253,7 @@ def event_checker():
 
         if LOGSymp.message_apparait_depuis_x_seconde("symbiose") and  validation_verif :
             crafting.need_material = True
-            crafting.change_status(10)
+            #crafting.change_status(10)
 
 ####### Programme principal qui a en charge toute la gestion du craft #######
 def grafcet_craft():
