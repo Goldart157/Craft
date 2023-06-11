@@ -22,8 +22,6 @@ from Class.Image import *
 from Class.Log import *
 from Class.Craft import *
 
-
-logging.basicConfig( level=logging.INFO)
 ##### Gestion et lecture des log
 #Donnée 
 
