@@ -164,6 +164,11 @@ def open_craft():
         crafting.HQ.restore()
         sleep(0.5)#Apparition fenetre
 
+    if  boutonFab.localiser_image():#Si on ne trouve pas le gui on le lance
+        return True
+    else:
+        return False
+
 ## Fermeture fenetre craft
 def close_craft():
     global boutonFab
@@ -208,8 +213,9 @@ def symbiose(touche_symb='<'):
             else:
                 return False
 
-        sleep(3)
-
+        sleep(1)
+        pyautogui.press(touche_symb)
+        sleep(1)
     return  open_craft()
 
 ####### Gestion UI et évenement #######
@@ -305,7 +311,7 @@ def grafcet_craft():
                         logging.info("Craft Exe : Vérification Matérialisation")
                         if crafting.need_material:#Condition géré sur la fonction d'évènement
 
-                            if symbiose('v'):
+                            if symbiose():
                                 crafting.need_material = False
                                 crafting.next_step()
 
@@ -439,7 +445,7 @@ config_Craft ={
        "text":"Vérification Repa"
      },
    2:{
-       "time_out":60,
+       "time_out":90,
        "text":"Vérification Symbiose"
      },
    3:{
@@ -494,15 +500,15 @@ config_Craft ={
 }
 
 ####### Lien vers les fichiers #######
-imageFabriquer = "./Ressources/bouton fabriquer.PNG"
-imageBuffCl = "./Ressources/BuffCl.PNG"
-imageBouffe = "./Ressources/ImageBouffe.PNG"
-imagePot = "./Ressources/buffPot.png"
-imageBoutonToutReparer = "./Ressources/bouton tout reparer.PNG"
-imageBoutonOuiRep = "./Ressources/boutton oui.PNG"
-imageSymb = "./Ressources/Symbiose100.PNG"
-imageBoutonOuiRep = "./Ressources/boutton oui.PNG"
-imageBoutonOuiSymb= "./Ressources/ouisymb.PNG"
+imageFabriquer = "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/bouton fabriquer.PNG"
+imageBuffCl = "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/BuffCl.PNG"
+imageBouffe = "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/ImageBouffe.PNG"
+imagePot = "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/buffPot.png"
+imageBoutonToutReparer = "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/bouton tout reparer.PNG"
+imageBoutonOuiRep = "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/boutton oui.PNG"
+imageSymb = "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/Symbiose100.PNG"
+imageBoutonOuiRep = "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/boutton oui.PNG"
+imageBoutonOuiSymb= "C:/Users/Adrien/source/repos/Goldart157/Craft/Ressources/ouisymb.PNG"
 log = "C:/Users/Adrien/Documents/FFLOG"
 titre_fenetre = "Final Fantasy XIV" 
 
