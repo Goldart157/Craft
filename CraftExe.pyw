@@ -205,7 +205,7 @@ def symbiose(touche_symb='<'):
         if symb100.localiser_image():
 
             symb100.clique_droit_image()
-            sleep(1)
+            sleep(2)
 
             #Confirmation symbiose
             if bouton_oui_symb.localiser_image():
@@ -213,9 +213,9 @@ def symbiose(touche_symb='<'):
             else:
                 return False
 
-        sleep(1)
-        pyautogui.press(touche_symb)
-        sleep(1)
+        sleep(4)
+    pyautogui.press(touche_symb)
+    sleep(2.5)
     return  open_craft()
 
 ####### Gestion UI et évenement #######
